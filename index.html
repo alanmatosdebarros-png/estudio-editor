@@ -384,7 +384,7 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
         <input type="range" class="scrub" id="scrub" min="0" max="1000" value="0" aria-label="Posição">
         <div class="ctrl">
           <button class="btn sm" id="playBtn">▶ Play</button>
-          <button class="btn sm" id="cutHere" title="Troca de enquadramento neste ponto">Nova troca aqui</button>
+          <button class="btn sm" id="cutHere" title="Cria um momento a partir daqui, com enquadramento próprio">Novo momento aqui</button>
           <label class="f" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="smooth"> movimento suave</label>
           <span class="mono small muted" id="tNow">00:00.0 / 00:00.0</span>
         </div>
@@ -395,7 +395,7 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
           <div class="list" id="segList" style="margin-top:10px"></div>
         </div>
         <div class="card">
-          <div class="head" style="align-items:center"><h2>Reenquadramento</h2><span class="small muted" id="kfInfo"></span></div>
+          <div class="head" style="align-items:center"><h2>Reenquadramento por momento</h2><span class="small muted" id="kfInfo"></span></div>
           <div class="list" id="kfList" style="margin-top:10px"></div>
         </div>
         <div class="card">
@@ -1476,6 +1476,8 @@ function draw(){
   drawFrame(pctx, pv.width, pv.height, pvFmt, cur, t, {outT:outPos});
   const D=outDur(cur); $("#scrub").value=D?Math.round(outPos/D*1000):0; $("#tNow").textContent=fmtT(outPos)+" / "+fmtT(D);
   $$("#cueList .item").forEach(el=>el.classList.toggle("now", (()=>{ const c=cur.cues[+el.dataset.i]; return c && t>=c.s && t<c.e; })()));
+  const mi=momentIdx(cur,outPos), nm=momentsOf(cur).length; $$("#kfList .mom").forEach(el=>el.classList.toggle("now", +el.dataset.mi===mi));
+  const h=$("#cw .hint2"); if(h) h.textContent = nm>1 ? "arraste pra reenquadrar o momento "+(mi+1) : "arraste pra reenquadrar";
 }
 async function playPreview(){
   if(!cur||!video.src) return; ensureAudio(); monitor.gain.value=1; previewPlaying=true; abortRun=false; $("#playBtn").textContent="❚❚ Pausar";
@@ -1496,11 +1498,16 @@ $("#revStatus").addEventListener("change", e=>{ if(!cur) return; cur.status=e.ta
 $("#reAnalyze").addEventListener("click", async ()=>{ if(!cur) return; go("novo"); try{ await analyze(cur); }catch(e){ toast(e.message||"Falhou"); } });
 // arrastar pra reenquadrar
 let drag=null;
-$("#cw").addEventListener("pointerdown", e=>{ if(!cur) return; const k=kfAt(cur, video.currentTime); drag={x:e.clientX, y:e.clientY, k, cx:k.cx, cy:k.cy}; $("#cw").classList.add("drag"); $("#cw").setPointerCapture(e.pointerId); });
+$("#cw").addEventListener("pointerdown", e=>{ if(!cur) return; ensureKf(); const k=kfAt(cur, video.currentTime); drag={x:e.clientX, y:e.clientY, k, cx:k.cx, cy:k.cy}; $("#cw").classList.add("drag"); $("#cw").setPointerCapture(e.pointerId); });
 $("#cw").addEventListener("pointermove", e=>{ if(!drag) return; const r=cropRect(cur,pvFmt,video.currentTime), rect=pv.getBoundingClientRect(); const dx=(e.clientX-drag.x)/rect.width*r.cw/r.sw, dy=(e.clientY-drag.y)/(rect.height*(1-r.top))*r.ch/r.sh; drag.k.cx=clamp(drag.cx-dx,0,1); drag.k.cy=clamp(drag.cy-dy,0,1); draw(); });
-const endDrag=()=>{ if(!drag) return; drag=null; $("#cw").classList.remove("drag"); saveJob(cur); renderKfs(); };
+const endDrag=()=>{ if(!drag) return; drag.k.tr=null; drag=null; $("#cw").classList.remove("drag"); saveJob(cur); renderKfs(); };
 $("#cw").addEventListener("pointerup", endDrag); $("#cw").addEventListener("pointercancel", endDrag);
-$("#cutHere").addEventListener("click", ()=>{ if(!cur) return; const t=video.currentTime, k=kfAt(cur,t); cur.kfs.push({t:+t.toFixed(2), cx:k.cx, cy:k.cy}); cur.kfs.sort((a,b)=>a.t-b.t); saveJob(cur); renderKfs(); toast("Nova troca. Arraste a prévia pra posicionar."); });
+$("#cutHere").addEventListener("click", ()=>{ if(!cur) return; if(previewPlaying) stopPreview(); ensureKf();
+  const o=outPos, ms=momentsOf(cur), i=momentIdx(cur,o), m=ms[i]; if(o-m.s<0.2 && i>0) return toast("Já começa um momento aqui. É só arrastar a prévia.");
+  const end=Math.min(m.e, o+3), k=m.k;
+  if(end<m.e-0.2) cur.kfs.push({t:kfSrc(end), cx:k.cx, cy:k.cy, tr:k.tr});
+  if(o>0.05) cur.kfs.push({t:kfSrc(o), cx:k.cx, cy:k.cy, tr:null});
+  cur.kfs.sort((a,b)=>a.t-b.t); saveJob(cur); renderKfs(); draw(); toast("Momento criado ("+fmtT(o)+" a "+fmtT(end)+"). Ajuste o fim na lista e arraste a prévia: só ele muda."); });
 $("#smooth").addEventListener("change", e=>{ cur.smooth=e.target.checked; saveJob(cur); draw(); });
 ["#maskY","#maskH"].forEach(s=>$(s).addEventListener("input", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; maskLabels(); draw(); saveJob(cur); }));
 $("#maskOn").addEventListener("change", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; draw(); saveJob(cur); });
@@ -1518,13 +1525,58 @@ function renderSegs(){
 $("#segList").addEventListener("change", e=>{ const inp=e.target.closest(".tin"); if(!inp) return; const i=+inp.closest("[data-si]").dataset.si, v=parseT(inp.value); if(isNaN(v)) return toast("Tempo inválido. Use min:seg, ex.: 0:05.5"); const s=segsOf(cur)[i]; s[inp.dataset.k]=v; if(s.out<=s.in) return toast("O OUT precisa ser depois do IN"); saveJob(cur); renderSegs(); showAt(outPos); });
 $("#segList").addEventListener("click", e=>{ const b=e.target.closest("[data-now]"); if(!b) return; const i=+b.closest("[data-si]").dataset.si, s=segsOf(cur)[i]; s[b.dataset.now]=+video.currentTime.toFixed(2); if(s.out<=s.in) return toast("O OUT precisa ser depois do IN"); saveJob(cur); renderSegs(); showAt(outPos); });
 
-function renderKfs(){
-  const {tracks}=tracksOf(cur); const named=tracks.map((t,i)=>t.n>=3?i:-1).filter(i=>i>=0).sort((a,b)=>tracks[a].cx-tracks[b].cx);
-  $("#kfInfo").textContent=named.length?named.length+" rosto"+(named.length>1?"s":"")+" no trecho":"";
-  $("#kfList").innerHTML=(cur.kfs||[]).map((k,i)=>{ const o=srcToOut(cur,k.t); const who=k.tr!=null&&named.includes(k.tr)?"Rosto "+(named.indexOf(k.tr)+1)+" ("+(tracks[k.tr].cx<0.4?"esquerda":tracks[k.tr].cx>0.6?"direita":"centro")+")":(k.tr==null?"Ajuste manual":"Rosto");
-    return `<div class="item"><div class="top"><b class="mono">${o==null?"fora do corte":fmtT(o)}</b><span class="small muted">${who} · ${Math.round(k.cx*100)}%</span><span style="margin-left:auto"></span><button class="btn sm" data-kgo="${i}">ver</button>${i?`<button class="btn sm" data-kdel="${i}">tirar</button>`:""}</div></div>`; }).join("") || `<p class="small muted">Sem enquadramentos.</p>`;
+function momentsOf(j){
+  const D=outDur(j), ks=(j.kfs||[]).slice().sort((a,b)=>a.t-b.t);
+  const nextO=t=>{ let acc=0; for(const sg of segsOf(j)){ if(sg.in>t) return acc; acc+=sg.out-sg.in; } return null; };
+  let arr=ks.map((k,i)=>{ let o=i===0?0:srcToOut(j,k.t); if(o==null && i>0) o=nextO(k.t); return {k,o}; }).filter(m=>m.o!=null);
+  arr=arr.filter((m,i)=>!(arr[i+1] && arr[i+1].o<=m.o+1e-3));
+  return arr.map((m,i)=>({k:m.k, s:m.o, e:i<arr.length-1?arr[i+1].o:D}));
 }
-$("#kfList").addEventListener("click", e=>{ const g=e.target.closest("[data-kgo]"), d=e.target.closest("[data-kdel]"); if(g){ const o=srcToOut(cur, cur.kfs[+g.dataset.kgo].t); if(o!=null) showAt(o+0.05); } if(d){ cur.kfs.splice(+d.dataset.kdel,1); saveJob(cur); renderKfs(); draw(); } });
+function momentIdx(j, o){ const ms=momentsOf(j); let idx=0; ms.forEach((m,i)=>{ if(o>=m.s-1e-3) idx=i; }); return idx; }
+function namedTracks(){ const {tracks,frames}=tracksOf(cur); const named=tracks.map((t,i)=>t.n>=3?i:-1).filter(i=>i>=0).sort((a,b)=>tracks[a].cx-tracks[b].cx); return {tracks,frames,named}; }
+function trackPos(frames, tr, s0, s1){
+  let pts=[]; frames.forEach(fr=>fr.fs.forEach(f=>{ if(f.tr===tr && fr.t>=s0 && fr.t<=s1) pts.push(f); }));
+  if(!pts.length) frames.forEach(fr=>fr.fs.forEach(f=>{ if(f.tr===tr) pts.push(f); }));
+  if(!pts.length) return null; return {cx:pts.reduce((a,f)=>a+f.cx,0)/pts.length, cy:pts.reduce((a,f)=>a+f.cy,0)/pts.length};
+}
+function renderKfs(){
+  cur.kfs.sort((a,b)=>a.t-b.t);
+  const {tracks,named}=namedTracks();
+  $("#kfInfo").textContent=named.length?named.length+" rosto"+(named.length>1?"s":"")+" no trecho":"";
+  const ms=momentsOf(cur), now=momentIdx(cur,outPos);
+  $("#kfList").innerHTML=ms.map((m,i)=>{ const k=m.k;
+    const opts=named.map((tr,n)=>`<option value="${tr}" ${k.tr===tr?"selected":""}>Rosto ${n+1} (${tracks[tr].cx<0.4?"esquerda":tracks[tr].cx>0.6?"direita":"centro"})</option>`).join("");
+    const manual=k.tr==null||!named.includes(k.tr);
+    return `<div class="item mom${i===now?" now":""}" data-mi="${i}"><div class="top"><b>Momento ${i+1}</b>
+      <input class="tin" data-mk="s" value="${fmtT(m.s)}" ${i?"":"disabled"} title="início (tempo do corte)">${i?`<button class="btn sm" data-mnow="s" title="Usar o tempo atual">agora</button>`:""}
+      <span class="small muted">→</span>
+      <input class="tin" data-mk="e" value="${fmtT(m.e)}" title="fim (tempo do corte)"><button class="btn sm" data-mnow="e" title="Usar o tempo atual">agora</button></div>
+      <div class="top"><select data-mwho style="width:auto">${opts}<option value="" ${manual?"selected":""}>Ajuste manual</option></select>
+      <span class="small muted">${(m.e-m.s).toFixed(1)} s</span><span style="margin-left:auto"></span><button class="btn sm" data-mgo="${i}">ver</button>${i?`<button class="btn sm" data-mdel="${i}" title="Junta com o momento anterior">tirar</button>`:""}</div></div>`; }).join("")
+    || `<p class="small muted">Sem enquadramentos.</p>`;
+  $("#kfList").insertAdjacentHTML("beforeend", `<p class="small muted" style="margin:0">Pra reenquadrar só um pedaço: pare a prévia no ponto, clique em “Novo momento aqui”, ajuste o fim e arraste a prévia. Só aquele momento muda.</p>`);
+}
+function ensureKf(){ if(!cur.kfs||!cur.kfs.length){ cur.kfs=[{t:(segsOf(cur)[0]||{in:0}).in, cx:0.5, cy:0.4}]; } }
+function kfSrc(o){ return +outToSrc(cur, clamp(o,0,outDur(cur))).t.toFixed(2); }
+function setMomentTime(i, which, o){
+  const ms=momentsOf(cur), m=ms[i]; if(!m) return;
+  if(which==="s"){ if(!i) return; const lo=ms[i-1].s+0.2, hi=m.e-0.2; if(o<lo||o>hi) return toast("O início precisa ficar entre o momento anterior e o fim deste"); m.k.t=kfSrc(o); }
+  else { const nx=ms[i+1]; if(o<=m.s+0.2) return toast("O fim precisa ser depois do início");
+    if(nx){ const hi=nx.e-0.2; if(o>hi) return toast("O fim passou do próximo momento. Tire o próximo ou encurte."); nx.k.t=kfSrc(o); }
+    else if(o<outDur(cur)-0.1){ cur.kfs.push({t:kfSrc(o), cx:m.k.cx, cy:m.k.cy, tr:m.k.tr}); } }
+  cur.kfs.sort((a,b)=>a.t-b.t); saveJob(cur); renderKfs(); draw();
+}
+$("#kfList").addEventListener("change", e=>{
+  const row=e.target.closest("[data-mi]"); if(!row) return; const i=+row.dataset.mi;
+  const inp=e.target.closest("[data-mk]"); if(inp){ const v=parseT(inp.value); if(isNaN(v)) return toast("Tempo inválido. Use min:seg, ex.: 0:05.5"); return setMomentTime(i, inp.dataset.mk, v); }
+  const w=e.target.closest("[data-mwho]"); if(w){ const m=momentsOf(cur)[i]; if(w.value===""){ m.k.tr=null; } else { const tr=+w.value, {frames}=namedTracks(); const s0=outToSrc(cur,m.s).t, s1=outToSrc(cur,Math.max(m.s,m.e-0.01)).t; const p=trackPos(frames,tr,s0,s1); if(p){ m.k.cx=+p.cx.toFixed(3); m.k.cy=+p.cy.toFixed(3); } m.k.tr=tr; } saveJob(cur); renderKfs(); showAt(m.s+0.05); }
+});
+$("#kfList").addEventListener("click", e=>{
+  const row=e.target.closest("[data-mi]"); if(!row) return; const i=+row.dataset.mi, ms=momentsOf(cur);
+  const n=e.target.closest("[data-mnow]"); if(n){ return setMomentTime(i, n.dataset.mnow, outPos); }
+  if(e.target.closest("[data-mgo]")){ showAt(ms[i].s+0.05); }
+  if(e.target.closest("[data-mdel]")){ const k=ms[i].k; cur.kfs.splice(cur.kfs.indexOf(k),1); saveJob(cur); renderKfs(); draw(); }
+});
 
 function renderCues(){
   const list=cur.cues||[];
