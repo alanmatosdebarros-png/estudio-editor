@@ -329,32 +329,37 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
     <div class="head"><div><div class="eyebrow" id="novoEyebrow">Novo post</div><h1>Cola o briefing. Ele entende o resto.</h1></div></div>
     <div class="grid-r">
       <div class="card" style="display:flex;flex-direction:column;gap:16px">
-        <div><h2>1. Briefing</h2><p class="sub">Texto do card do Trello. Tempos do bruto em min:seg (ou h:min:seg).</p></div>
-        <textarea id="briefing" rows="6" aria-label="Briefing" placeholder="GNT · Papo de Segunda · Ep 1&#10;Trecho 01 In: 0:05 / Out: 0:28&#10;Tarja: &quot;...&quot;&#10;Formato: Vídeo Aspas · saídas 9x16 e 1x1"></textarea>
-        <div class="row"><button class="btn" id="readBrief">Ler briefing</button><span class="small muted" id="briefMsg"></span></div>
+        <div><h2>1. Briefing</h2><p class="sub">Preencha os campos. Nos tempos, digite só os números: 005 vira 0:05, 1225 vira 12:25.</p></div>
         <div class="grid2" style="gap:14px">
-          <label class="f">Programa<select id="progSel"></select></label>
+          <label class="f">Programa<div class="row" style="flex-wrap:nowrap;gap:8px"><span class="chip static" style="flex:none">GNT</span><select id="progSel"></select></div></label>
+          <label class="f">Episódio<input type="text" id="epIn" inputmode="numeric" placeholder="ex.: 3"></label>
+        </div>
+        <div class="f" style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted);font-weight:500">Trechos (IN e OUT do bruto)
+          <div class="list" id="segRows"></div>
+          <div><button class="btn sm" id="addSeg" type="button">+ trecho</button></div>
+        </div>
+        <label class="f">Tarja<input type="text" id="tarjaIn" placeholder="Só a frase, sem aspas"></label>
+        <div class="grid2" style="gap:14px">
+          <label class="f">Formato<select id="fmtSel"><option>Vídeo Aspas</option><option>IN/OUT</option><option>Produtizado</option></select></label>
+          <label class="f">Dimensão<select id="dimSel">
+            <option value="9x16">9x16</option><option value="1x1">1x1</option><option value="4x5">4x5</option>
+            <option value="9x16,1x1" selected>9x16 e 1x1</option><option value="9x16,4x5">9x16 e 4x5</option><option value="9x16,4x5,1x1">9x16, 4x5 e 1x1</option></select></label>
           <label class="f">Tipo de corte<select id="tipoSel">
             <option value="aspa">Aspa (até 59 s)</option><option value="trecho">Trecho (até 2min30)</option><option value="longo">Trecho longo (6 a 10 min)</option></select></label>
-          <label class="f">Nome do job<input type="text" id="tituloIn"></label>
           <label class="f">Prazo<input type="date" id="prazoIn" style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:8px 11px;width:100%"></label>
-          <label class="f">Tarja<input type="text" id="tarjaIn"></label>
+          <label class="f">Nome do job<input type="text" id="tituloIn"></label>
           <label class="f">Responsável<input type="text" id="respIn"></label>
         </div>
-        <dl class="kv"><dt>Trechos</dt><dd><div class="tc" id="kTc"><span class="muted">Leia o briefing pra ver os IN/OUT</span></div></dd></dl>
-        <div class="check warn" id="durCheck"><div><strong>Sem tempo de corte</strong>Coloque o IN e o OUT no briefing pra conferir a duração.</div></div>
+        <div class="check warn" id="durCheck"><div><strong>Sem tempo de corte</strong>Preencha o IN e o OUT do trecho.</div></div>
+        <details>
+          <summary class="small muted" style="cursor:pointer">Ou cole o texto do card do Trello</summary>
+          <textarea id="briefing" rows="5" aria-label="Texto do Trello" style="margin-top:8px"></textarea>
+          <div class="row" style="margin-top:8px"><button class="btn sm" id="readBrief" type="button">Preencher os campos com esse texto</button><span class="small muted" id="briefMsg"></span></div>
+        </details>
       </div>
       <div class="card" style="display:flex;flex-direction:column;gap:16px">
         <div><h2>2. Bruto</h2><p class="sub">O arquivo fica no seu computador. Pode ser o episódio inteiro.</p></div>
         <div class="drop" id="dropBruto"><span class="small muted" id="brutoName">Nenhum arquivo escolhido</span><button class="btn sm" id="pickBruto" style="margin-left:auto">Escolher vídeo</button><input type="file" id="brutoInput" accept="video/*" hidden></div>
-        <div><h2>3. Formato</h2></div>
-        <div class="formats" id="formats">
-          <button class="fmt" data-fmt="Vídeo Aspas" aria-pressed="true"><div class="pv"><i style="top:14%;background:var(--tarja)"></i><i style="bottom:14%;height:5%;background:#ddd"></i></div><div class="meta"><strong>Vídeo Aspas</strong><span>tarja roxa animada</span></div></button>
-          <button class="fmt" data-fmt="IN/OUT" aria-pressed="false"><div class="pv"><i style="bottom:14%;height:5%;background:#ddd"></i></div><div class="meta"><strong>IN/OUT</strong><span>corte com legenda</span></div></button>
-          <button class="fmt" data-fmt="Produtizado" aria-pressed="false"><div class="pv"><i style="top:40%;left:20%;right:30%;height:5%;background:#fff;transform:rotate(-4deg)"></i><i style="top:50%;left:34%;right:18%;height:5%;background:#ddd"></i></div><div class="meta"><strong>Produtizado</strong><span>legenda perto de quem fala</span></div></button>
-        </div>
-        <div><h2>4. Saídas</h2><div class="row" style="margin-top:10px" id="outs">
-          <button class="chip" data-out="9x16" aria-pressed="true">9x16</button><button class="chip" data-out="4x5" aria-pressed="false">4x5</button><button class="chip" data-out="1x1" aria-pressed="false">1x1</button></div></div>
         <div class="row"><button class="btn primary" id="createJob">Criar job e processar</button></div>
         <div class="progress"><b id="anBar"></b></div>
         <ol class="steps2" id="anSteps"></ol>
@@ -1240,50 +1245,85 @@ $("#jobs").addEventListener("click", async e=>{
 /* ---------- novo post ---------- */
 $("#progSel").innerHTML=ORDER.map(k=>`<option value="${k}">${PROGRAMAS[k].nome}</option>`).join("")+`<option value="">Outro / sem programa</option>`;
 $("#prazoIn").value=todayISO();
-let draft={segs:[], file:null, handle:null};
+let draft={file:null, handle:null}, titleTouched=false;
+/* só números: 5 → 0:05 · 125 → 1:25 · 1225 → 12:25 · 10205 → 1:02:05 */
+function digitsToT(str){
+  str=String(str||"").trim(); if(!str) return NaN;
+  if(/[:;]/.test(str)) return parseT(str);
+  const m=str.replace(",",".").match(/^(\d+)(?:\.(\d+))?$/); if(!m) return NaN;
+  const d=m[1], frac=m[2]?Number("0."+m[2]):0;
+  const sec=Number(d.slice(-2)), min=Number(d.slice(-4,-2)||0), hr=Number(d.slice(0,-4)||0);
+  if(sec>59||min>59) return NaN;
+  return hr*3600+min*60+sec+frac;
+}
+function showT(t){ const h=Math.floor(t/3600), m=Math.floor(t%3600/60), s=Math.floor(t%60), f=Math.round((t%1)*10); return (h?h+":"+String(m).padStart(2,"0"):m)+":"+String(s).padStart(2,"0")+(f?","+f:""); }
+function segRow(i, a="", b=""){ return `<div class="item" data-row="${i}"><div class="top"><b style="width:62px">Trecho ${i+1}</b>
+  <span class="small muted">IN</span><input class="tin" data-k="in" inputmode="numeric" placeholder="005" value="${esc(a)}">
+  <span class="small muted">OUT</span><input class="tin" data-k="out" inputmode="numeric" placeholder="028" value="${esc(b)}">
+  <span class="small muted" data-dur></span><span style="margin-left:auto"></span>${i?`<button class="btn sm" type="button" data-rm="${i}">tirar</button>`:""}</div></div>`; }
+function rowsData(){ return $$("#segRows [data-row]").map(r=>({a:r.querySelector('[data-k="in"]').value, b:r.querySelector('[data-k="out"]').value})); }
+function renderRows(list){ if(!list.length) list=[{a:"",b:""}]; $("#segRows").innerHTML=list.map((x,i)=>segRow(i,x.a,x.b)).join(""); refreshDraft(); }
+function draftSegs(){ return rowsData().map(x=>({in:digitsToT(x.a), out:digitsToT(x.b)})).filter(s=>!isNaN(s.in)&&!isNaN(s.out)&&s.out>s.in); }
+function refreshDraft(){
+  $$("#segRows [data-row]").forEach(r=>{
+    const a=digitsToT(r.querySelector('[data-k="in"]').value), b=digitsToT(r.querySelector('[data-k="out"]').value), el=r.querySelector("[data-dur]");
+    const inA=r.querySelector('[data-k="in"]'), inB=r.querySelector('[data-k="out"]');
+    inA.style.borderColor = inA.value && isNaN(a) ? "var(--bad)" : ""; inB.style.borderColor = inB.value && (isNaN(b) || (!isNaN(a)&&b<=a)) ? "var(--bad)" : "";
+    el.textContent = !isNaN(a)&&!isNaN(b)&&b>a ? (b-a).toFixed(b-a<10?1:0).replace(".",",")+" s" : (inB.value&&!isNaN(a)&&!isNaN(b)?"OUT antes do IN":"");
+  });
+  checkDur(); autoTitle();
+}
+function autoTitle(){ if(titleTouched) return; const p=$("#progSel").value, ep=$("#epIn").value.trim(), n=$$("#segRows [data-row]").length; $("#tituloIn").value=[p?PROGRAMAS[p].nome:"Job", ep?"Ep"+ep:null, n===1?"Trecho 01":null].filter(Boolean).join(" · "); }
+$("#segRows").addEventListener("input", refreshDraft);
+$("#segRows").addEventListener("focusout", e=>{ const inp=e.target.closest(".tin"); if(!inp||!inp.value) return; const t=digitsToT(inp.value); if(!isNaN(t)) inp.value=showT(t); refreshDraft(); });
+$("#segRows").addEventListener("click", e=>{ const b=e.target.closest("[data-rm]"); if(!b) return; const d=rowsData(); d.splice(+b.dataset.rm,1); renderRows(d); });
+$("#addSeg").addEventListener("click", ()=>{ const d=rowsData(); d.push({a:"",b:""}); renderRows(d); $$("#segRows .tin").slice(-2)[0].focus(); });
+$("#progSel").addEventListener("change", autoTitle); $("#epIn").addEventListener("input", autoTitle);
+$("#tituloIn").addEventListener("input", ()=>{ titleTouched=true; });
+renderRows([]);
 function readBriefing(){
   const t=$("#briefing").value, low=t.toLowerCase();
-  if(!t.trim()){ $("#briefMsg").textContent="Cole o briefing primeiro."; return; }
+  if(!t.trim()){ $("#briefMsg").textContent="Cole o texto primeiro."; return; }
   const found=ORDER.find(k=>low.includes(PROGRAMAS[k].nome.toLowerCase().replace(/[?,]/g,""))||(k==="qheep"&&/porchat/.test(low)));
   if(found) $("#progSel").value=found;
   const TM="(\\d{1,2}(?:[:;.]\\d{2}){1,2}(?:[.,]\\d+)?)";
-  const re=new RegExp("\\bin\\b\\s*[:;\\-]?\\s*"+TM+"[\\s\\S]*?\\bout\\b\\s*[:;\\-]?\\s*"+TM, "gi"); let m;
-  draft.segs=[]; while((m=re.exec(t))){ const a=parseT(m[1].replace(/[.,](\d+)$/,".$1")), b=parseT(m[2].replace(/[.,](\d+)$/,".$1")); if(b>a) draft.segs.push({in:a, out:b, raw:[m[1],m[2]]}); }
+  const re=new RegExp("\\bin\\b\\s*[:;\\-]?\\s*"+TM+"[\\s\\S]*?\\bout\\b\\s*[:;\\-]?\\s*"+TM, "gi"); let m; const rows=[];
+  while((m=re.exec(t))){ const a=parseT(m[1].replace(/[.,](\d+)$/,".$1")), b=parseT(m[2].replace(/[.,](\d+)$/,".$1")); if(b>a) rows.push({a:showT(a), b:showT(b)}); }
+  if(rows.length) renderRows(rows);
   const tj=t.match(/tarja:\s*["“]?([^"”\n]+)["”]?/i); if(tj) $("#tarjaIn").value=tj[1].trim();
-  const ep=t.match(/\bep\.?\s*(\d+)/i), tr=t.match(/trecho\s*(\d+)/i);
+  const ep=t.match(/\bep\.?\s*(\d+)/i); if(ep) $("#epIn").value=ep[1];
   if(/aspas?/i.test(t)) $("#tipoSel").value="aspa";
-  const fm=/produtizad/i.test(t)?"Produtizado":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null;
-  if(fm) $$(".fmt").forEach(x=>x.setAttribute("aria-pressed", x.dataset.fmt===fm));
-  const outs=(t.match(/\b(9x16|4x5|1x1)\b/gi)||[]).map(s=>s.toLowerCase()); if(outs.length) $$("#outs [data-out]").forEach(b=>b.setAttribute("aria-pressed", outs.includes(b.dataset.out)));
-  if(!$("#tituloIn").value){ const pn=$("#progSel").value?PROGRAMAS[$("#progSel").value].nome:"Job"; $("#tituloIn").value=[pn, ep?"Ep"+ep[1]:null, tr?"Trecho "+tr[1].padStart(2,"0"):null].filter(Boolean).join(" · "); }
-  $("#kTc").innerHTML = draft.segs.length ? draft.segs.map(s=>`<code>${s.raw[0]} → ${s.raw[1]}</code>`).join("")+(draft.segs.length>1?`<span class="small muted" style="font-family:var(--body)">viram um edit só</span>`:"") : `<span class="muted">Nenhum IN/OUT encontrado</span>`;
-  $("#briefMsg").textContent="Lido. Confira os campos."; checkDur();
+  const fm=/produtizad/i.test(t)?"Produtizado":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null; if(fm) $("#fmtSel").value=fm;
+  const outs=[...new Set((t.match(/\b(9x16|4x5|1x1)\b/gi)||[]).map(s=>s.toLowerCase()))];
+  if(outs.length){ const key=["9x16","4x5","1x1"].filter(o=>outs.includes(o)).join(","); if([...$("#dimSel").options].some(o=>o.value===key)) $("#dimSel").value=key; }
+  titleTouched=false; autoTitle();
+  $("#briefMsg").textContent = rows.length ? "Campos preenchidos. Confira." : "Preenchi o que deu. Os tempos não foram encontrados.";
 }
 function checkDur(){
-  const L=LIMITS[$("#tipoSel").value], total=draft.segs.reduce((a,s)=>a+s.out-s.in,0), box=$("#durCheck");
-  if(!draft.segs.length){ box.className="check warn"; box.innerHTML=`<div><strong>Sem tempo de corte</strong>Coloque o IN e o OUT no briefing pra conferir a duração.</div>`; return; }
+  const segs=draftSegs(), L=LIMITS[$("#tipoSel").value], total=segs.reduce((a,s)=>a+s.out-s.in,0), box=$("#durCheck");
+  if(!segs.length){ box.className="check warn"; box.innerHTML=`<div><strong>Sem tempo de corte</strong>Preencha o IN e o OUT do trecho.</div>`; return; }
   const ok=total<=L.max&&(!L.min||total>=L.min);
   box.className="check "+(ok?"ok":"bad"); box.innerHTML=`<div><strong>${ok?"Duração dentro do padrão":"Duração fora do padrão"} · ${total<60?Math.round(total)+" s":Math.floor(total/60)+"min"+String(Math.round(total%60)).padStart(2,"0")}</strong>${L.label}${ok?"":". Revise o IN/OUT ou mude o tipo de corte."}</div>`;
 }
 $("#readBrief").addEventListener("click", readBriefing);
 $("#tipoSel").addEventListener("change", checkDur);
-$("#formats").addEventListener("click", e=>{ const b=e.target.closest(".fmt"); if(b) $$(".fmt").forEach(x=>x.setAttribute("aria-pressed", x===b)); });
-$("#outs").addEventListener("click", e=>{ const b=e.target.closest("[data-out]"); if(b) b.setAttribute("aria-pressed", b.getAttribute("aria-pressed")!=="true"); });
 $("#pickBruto").addEventListener("click", async ()=>{ const r=await pickFile(); if(!r) return; draft.file=r.file; draft.handle=r.handle; $("#brutoName").textContent=r.file.name+" · "+(r.file.size/1e9>=1?(r.file.size/1e9).toFixed(2)+" GB":Math.round(r.file.size/1e6)+" MB"); $("#dropBruto").classList.add("has"); });
 const dz=$("#dropBruto"); dz.addEventListener("dragover", e=>{ e.preventDefault(); }); dz.addEventListener("drop", async e=>{ e.preventDefault(); const it=e.dataTransfer.items&&e.dataTransfer.items[0]; let h=null; try{ if(it&&it.getAsFileSystemHandle) h=await it.getAsFileSystemHandle(); }catch(err){} const f=e.dataTransfer.files[0]; if(!f) return; draft.file=f; draft.handle=h&&h.kind==="file"?h:null; $("#brutoName").textContent=f.name; dz.classList.add("has"); });
 $("#createJob").addEventListener("click", async ()=>{
-  if(!draft.segs.length){ readBriefing(); if(!draft.segs.length) return toast("O briefing precisa ter pelo menos um IN e um OUT"); }
+  const segs=draftSegs();
+  if(!segs.length) return toast("Preencha o IN e o OUT de pelo menos um trecho");
+  if(rowsData().some(x=>(x.a||x.b) && (isNaN(digitsToT(x.a))||isNaN(digitsToT(x.b))||digitsToT(x.b)<=digitsToT(x.a)))) return toast("Tem um trecho com tempo errado (marcado em vermelho)");
   if(!draft.file) return toast("Escolha o bruto");
-  const outs=$$("#outs [aria-pressed=true]").map(b=>b.dataset.out); if(!outs.length) return toast("Escolha pelo menos uma saída");
+  const outs=$("#dimSel").value.split(",");
   ensureAudio();
-  const j={ id:newId(), titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, tipo:$("#tipoSel").value, fmt:$(".fmt[aria-pressed=true]").dataset.fmt, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim(), briefing:$("#briefing").value,
-    segs:draft.segs.map(s=>({in:s.in,out:s.out})), cues:[], kfs:[], samples:[], thumbs:[], mask:{on:false,y:82,h:12}, smooth:false, status:"Em produção", stage:"novo", fileName:draft.file.name, post:null, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+  const j={ id:newId(), titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, ep:$("#epIn").value.trim(), tipo:$("#tipoSel").value, fmt:$("#fmtSel").value, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim().replace(/^["“]|["”]$/g,""), briefing:$("#briefing").value,
+    segs, cues:[], kfs:[], samples:[], thumbs:[], mask:{on:false,y:82,h:12}, smooth:false, status:"Em produção", stage:"novo", fileName:draft.file.name, post:null, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
   FILES[j.id]=draft.file; if(draft.handle) await idb.set("handles", j.id, draft.handle).catch(()=>{});
   JOBS.push(j); cur=j; await saveJob(j,true);
   $("#createJob").disabled=true;
   try{ await analyze(j); }catch(e){ console.error(e); toast(e.message||"Falhou"); }
   $("#createJob").disabled=false;
-  draft={segs:[],file:null,handle:null}; ["#briefing","#tituloIn","#tarjaIn","#respIn"].forEach(s=>$(s).value=""); $("#brutoName").textContent="Nenhum arquivo escolhido"; $("#dropBruto").classList.remove("has"); $("#kTc").innerHTML=`<span class="muted">Leia o briefing pra ver os IN/OUT</span>`;
+  draft={file:null,handle:null}; titleTouched=false; ["#briefing","#tarjaIn","#respIn","#epIn"].forEach(s=>$(s).value=""); renderRows([]); $("#brutoName").textContent="Nenhum arquivo escolhido"; $("#dropBruto").classList.remove("has");
   if(j.stage!=="processado"){ $("#anDone").hidden=false; }
 });
 
