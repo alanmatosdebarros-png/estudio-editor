@@ -999,12 +999,13 @@ function centerAt(j, t){
   if(j.smooth && i>0){ const p=kfs[i-1], f=clamp((t-k.t)/0.6,0,1), e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2; return {cx:p.cx+(k.cx-p.cx)*e, cy:p.cy+(k.cy-p.cy)*e}; }
   return {cx:k.cx, cy:k.cy};
 }
+function bandFrac(j, fmt){ return (j.fmt==="Tarja Sensacionalista" && (j.tarja||"").trim()) ? (fmt==="9x16"?0.213:fmt==="4x5"?0.18:0.19) : 0; }
 function cropRect(j, fmt, t){
-  const [W,H]=FMTS[fmt], sw=video.videoWidth||1920, sh=video.videoHeight||1080, ta=W/H;
+  const [W,H0]=FMTS[fmt], top=bandFrac(j,fmt), H=H0*(1-top), sw=video.videoWidth||1920, sh=video.videoHeight||1080, ta=W/H;
   let cw, ch; if(sw/sh>ta){ ch=sh; cw=ch*ta; } else { cw=sw; ch=cw/ta; }
   const {cx,cy}=centerAt(j,t);
   const x=clamp(cx*sw-cw/2, 0, sw-cw), y=clamp(cy*sh-ch*0.42, 0, sh-ch);
-  return {x,y,cw,ch,sw,sh};
+  return {x,y,cw,ch,sw,sh,top};
 }
 
 /* ---------- desenho do quadro (prévia e render) ---------- */
@@ -1086,7 +1087,7 @@ function drawSubtitle(ctx, W, H, fmt, j, c, yFrac){
 function facesInOut(j, fmt, W, H, t0, t1){
   const rects=[];
   for(const s of (j.samples||[])){ const o=srcToOut(j,s.t); if(o==null||o<t0||o>t1) continue; const r=cropRect(j,fmt,s.t);
-    for(const f of s.f){ const x=(f[0]*r.sw - r.x)/r.cw*W, y=(f[1]*r.sh - r.y)/r.ch*H, w=f[2]*r.sw/r.cw*W, h=f[3]*r.sh/r.ch*H; if(x+w/2<0||x-w/2>W) continue; rects.push({x0:x-w*0.6, x1:x+w*0.6, y0:y-h*0.65, y1:y+h*0.6}); } }
+    for(const f of s.f){ const x=(f[0]*r.sw - r.x)/r.cw*W, y=r.top*H+(f[1]*r.sh - r.y)/r.ch*H*(1-r.top), w=f[2]*r.sw/r.cw*W, h=f[3]*r.sh/r.ch*H*(1-r.top); if(x+w/2<0||x-w/2>W) continue; rects.push({x0:x-w*0.6, x1:x+w*0.6, y0:y-h*0.65, y1:y+h*0.6}); } }
   return rects;
 }
 const posCache=new Map();
@@ -1102,12 +1103,13 @@ function tarjaTop(j, fmt, W, H, bw, bh, defaultTop){
 function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   const r=cropRect(j, fmt, tSrc);
   ctx.save(); ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
-  ctx.drawImage(video, r.x, r.y, r.cw, r.ch, 0, 0, W, H);
-  const sy=H/r.ch;
+  const vy=r.top*H, vh=H-vy;
+  ctx.drawImage(video, r.x, r.y, r.cw, r.ch, 0, vy, W, vh);
+  const sy=vh/r.ch;
   if(j.mask && j.mask.on){
     const my=(j.mask.y/100)*r.sh, mh=(j.mask.h/100)*r.sh;
-    const dy=(my-r.y)*sy, dh=mh*sy;
-    if(dy+dh>0 && dy<H){ ctx.save(); ctx.beginPath(); ctx.rect(0,dy,W,dh); ctx.clip(); ctx.filter=`blur(${Math.round(W*0.035)}px)`; ctx.drawImage(video, r.x, r.y, r.cw, r.ch, -W*0.05, 0, W*1.1, H); ctx.filter="none"; ctx.fillStyle="rgba(0,0,0,.12)"; ctx.fillRect(0,dy,W,dh); ctx.restore(); }
+    const dy=vy+(my-r.y)*sy, dh=mh*sy;
+    if(dy+dh>0 && dy<H){ ctx.save(); ctx.beginPath(); ctx.rect(0,dy,W,dh); ctx.clip(); ctx.filter=`blur(${Math.round(W*0.035)}px)`; ctx.drawImage(video, r.x, r.y, r.cw, r.ch, -W*0.05, vy, W*1.1, vh); ctx.filter="none"; ctx.fillStyle="rgba(0,0,0,.12)"; ctx.fillRect(0,dy,W,dh); ctx.restore(); }
   }
   if(o.clean){ ctx.restore(); return; }
   const oT = o.outT!=null ? o.outT : (srcToOut(j,tSrc)||0);
@@ -1117,7 +1119,7 @@ function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
 
   if(j.fmt==="Tarja Sensacionalista" && tarja){
     const [bg,fg] = SENS_CORES[j.tarjaCor] || SENS_CORES.roxa;
-    const bandH = H*(fmt==="9x16"?0.213:fmt==="4x5"?0.18:0.19);
+    const bandH = H*bandFrac(j,fmt);
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,bandH);
     const fs=Math.round(W*0.053); ctx.font=`600 ${fs}px ${FONT()}`; ctx.fillStyle=fg; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
     const lines=blockLines(ctx, tarja, W*0.84, 2), lh=fs*1.16;
@@ -1495,7 +1497,7 @@ $("#reAnalyze").addEventListener("click", async ()=>{ if(!cur) return; go("novo"
 // arrastar pra reenquadrar
 let drag=null;
 $("#cw").addEventListener("pointerdown", e=>{ if(!cur) return; const k=kfAt(cur, video.currentTime); drag={x:e.clientX, y:e.clientY, k, cx:k.cx, cy:k.cy}; $("#cw").classList.add("drag"); $("#cw").setPointerCapture(e.pointerId); });
-$("#cw").addEventListener("pointermove", e=>{ if(!drag) return; const r=cropRect(cur,pvFmt,video.currentTime), rect=pv.getBoundingClientRect(); const dx=(e.clientX-drag.x)/rect.width*r.cw/r.sw, dy=(e.clientY-drag.y)/rect.height*r.ch/r.sh; drag.k.cx=clamp(drag.cx-dx,0,1); drag.k.cy=clamp(drag.cy-dy,0,1); draw(); });
+$("#cw").addEventListener("pointermove", e=>{ if(!drag) return; const r=cropRect(cur,pvFmt,video.currentTime), rect=pv.getBoundingClientRect(); const dx=(e.clientX-drag.x)/rect.width*r.cw/r.sw, dy=(e.clientY-drag.y)/(rect.height*(1-r.top))*r.ch/r.sh; drag.k.cx=clamp(drag.cx-dx,0,1); drag.k.cy=clamp(drag.cy-dy,0,1); draw(); });
 const endDrag=()=>{ if(!drag) return; drag=null; $("#cw").classList.remove("drag"); saveJob(cur); renderKfs(); };
 $("#cw").addEventListener("pointerup", endDrag); $("#cw").addEventListener("pointercancel", endDrag);
 $("#cutHere").addEventListener("click", ()=>{ if(!cur) return; const t=video.currentTime, k=kfAt(cur,t); cur.kfs.push({t:+t.toFixed(2), cx:k.cx, cy:k.cy}); cur.kfs.sort((a,b)=>a.t-b.t); saveJob(cur); renderKfs(); toast("Nova troca. Arraste a prévia pra posicionar."); });
@@ -1815,7 +1817,6 @@ $("#kitList").addEventListener("click", async e=>{ const b=e.target.closest("[da
   await loadKit(); renderPainel(); renderPickers();
   if(NO_AI) notice("Modo sem IA (teste): sem transcrição nem detector de rosto.","warn");
 })();
-
 </script>
 </body>
 </html>
