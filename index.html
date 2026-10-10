@@ -340,7 +340,8 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
         </div>
         <label class="f">Tarja<input type="text" id="tarjaIn" placeholder="Só a frase, sem aspas"></label>
         <div class="grid2" style="gap:14px">
-          <label class="f">Formato<select id="fmtSel"><option>Vídeo Aspas</option><option>IN/OUT</option><option>Produtizado</option></select></label>
+          <label class="f">Formato<select id="fmtSel"><option>Tarja Sensacionalista</option><option>Tarja de Contexto</option><option value="Vídeo Aspas">Tarja Aspas</option><option>IN/OUT</option><option>Produtizado</option></select></label>
+          <label class="f" id="corWrap">Cor da tarja sensacionalista<select id="corSel"><option value="roxa">Roxa (texto branco)</option><option value="preta">Preta (texto branco)</option><option value="branca">Branca (texto preto)</option><option value="branca-roxa">Branca com letra roxa</option></select></label>
           <label class="f">Dimensão<select id="dimSel">
             <option value="9x16">9x16</option><option value="1x1">1x1</option><option value="4x5">4x5</option>
             <option value="9x16,1x1" selected>9x16 e 1x1</option><option value="9x16,4x5">9x16 e 4x5</option><option value="9x16,4x5,1x1">9x16, 4x5 e 1x1</option></select></label>
@@ -406,7 +407,7 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
         <div class="card">
           <h2>Tarja</h2>
           <input type="text" id="tarjaEd" style="margin-top:10px">
-          <div class="row small muted" style="margin-top:8px"><span id="tarjaCount"></span><span>Formato:</span><select id="fmtEd" style="width:auto"></select></div>
+          <div class="row small muted" style="margin-top:8px"><span id="tarjaCount"></span><span>Formato:</span><select id="fmtEd" style="width:auto"></select><select id="corEd" style="width:auto"><option value="roxa">Roxa</option><option value="preta">Preta</option><option value="branca">Branca</option><option value="branca-roxa">Branca c/ letra roxa</option></select></div>
         </div>
         <div class="card">
           <div class="head" style="align-items:center"><h2>Legendas</h2><div class="row"><button class="btn sm" id="fixGuide">Aplicar guia</button><button class="btn sm" id="addCue">+ legenda aqui</button></div></div>
@@ -480,10 +481,10 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
           <option value="onnx-community/whisper-base">Rápido (~80 MB na 1ª vez)</option></select></label>
       </div>
       <div class="card">
-        <h2>Padrão da marca</h2>
-        <label class="f" style="margin-top:12px">Logo (PNG com fundo transparente, canto superior direito)<input type="file" id="logoIn" accept="image/png,image/webp"></label>
-        <div class="row" style="margin-top:8px"><img id="logoPv" alt="" style="max-height:40px" hidden><button class="btn sm" id="logoClear">Tirar logo</button></div>
-        <label class="f" style="margin-top:12px">Cor da tarja<input type="text" id="tarjaColor"></label>
+        <h2>Kit GNT</h2>
+        <p class="sub">Fontes PP Mori e bugs da pasta ENTREGA 3. Ficam salvos só neste navegador e não vão pro site público, por causa da licença das fontes e da marca.</p>
+        <div class="drop" id="kitDrop" style="margin-top:12px"><span class="small muted">Arraste aqui PPMori-Regular.otf, PPMori-SemiBold.otf e os PNGs da pasta BUGS (9x16.png, 3x4.png...)</span><label class="btn sm" for="kitIn" style="margin-left:auto;cursor:pointer">Escolher arquivos</label><input type="file" id="kitIn" multiple accept=".otf,.ttf,.woff,.woff2,.png,.webp,.json" hidden></div>
+        <div class="files" id="kitList" style="margin-top:10px"></div>
         <label class="f" style="margin-top:12px">Alça de cada trecho na análise (s)<input type="text" id="handleIn"></label>
       </div>
     </div>
@@ -813,7 +814,7 @@ const newId = () => "j"+Date.now().toString(36)+Math.random().toString(36).slice
 /* ---------- IndexedDB ---------- */
 const idb = (()=>{ let dbp;
   function open(){ return dbp ||= new Promise((res,rej)=>{ const r=indexedDB.open("estudio-editor",1); r.onupgradeneeded=()=>{ const d=r.result; d.createObjectStore("jobs"); d.createObjectStore("handles"); d.createObjectStore("kv"); }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
-  async function tx(store, mode, fn){ const d=await open(); return new Promise((res,rej)=>{ const t=d.transaction(store, mode); const s=t.objectStore(store); const out=fn(s); t.oncomplete=()=>res(out&&out.result!==undefined?out.result:out); t.onerror=()=>rej(t.error); }); }
+  async function tx(store, mode, fn){ const d=await open(); return new Promise((res,rej)=>{ const t=d.transaction(store, mode); const s=t.objectStore(store); const out=fn(s); t.oncomplete=()=>res(out instanceof IDBRequest?out.result:out); t.onerror=()=>rej(t.error); }); }
   return {
     get:(st,k)=>tx(st,"readonly",s=>s.get(k)),
     set:(st,k,v)=>tx(st,"readwrite",s=>s.put(v,k)),
@@ -1007,50 +1008,143 @@ function cropRect(j, fmt, t){
 }
 
 /* ---------- desenho do quadro (prévia e render) ---------- */
-let logoImg=null;
+/* padrão GNT (templates da pasta ENTREGA 3): roxo 3912B2, PP Mori SemiBold, legenda branca com contorno 3, bug embaixo no centro */
+const GNT = {roxo:"#3912B2", lilas:"#CA7CD8", laranja:"#CC820D", lima:"#D5E9AA", vermelho:"#EA0F2F"};
+const FORMATOS = ["Tarja Sensacionalista","Tarja de Contexto","Vídeo Aspas","IN/OUT","Produtizado"];
+let logoImg=null; const bugImgs={}; let fontsReady=false;
+const FONT = () => fontsReady ? '"PP Mori", "DM Sans", sans-serif' : '"DM Sans", sans-serif';
 function wrapPx(ctx, text, maxW){ const words=text.split(/\s+/); const lines=[]; let l=""; for(const w of words){ const c=l?l+" "+w:w; if(ctx.measureText(c).width>maxW && l){ lines.push(l); l=w; } else l=c; } if(l) lines.push(l); return lines; }
 function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
+function cleanTarja(t){ return String(t||"").trim().replace(/^["“]|["”]$/g,""); }
+/* regras GNT (guia "Boas práticas"):
+   - texto das tarjas em caixa baixa (só a primeira letra maiúscula), blocado e sem viúva
+   - Contexto e Aspas: sempre roxas, fixas na abertura sem efeito, 4 s de leitura e só movimento de saída, nunca sobre o rosto
+   - Aspas: texto e aspas verdes, aspas nas pontas da caixa
+   - Sensacionalista: sempre 2 linhas, perto da base da faixa, 4 cores; bug centralizado embaixo
+   - demais formatos: bug alinhado à direita, em cima, na margem do 4x5 */
+const SENS_CORES = {"roxa":[GNT.roxo,"#fff"], "preta":["#0B0013","#fff"], "branca":["#fff","#0B0013"], "branca-roxa":["#fff",GNT.roxo]};
+function caixaBaixa(t){ t=cleanTarja(t); if(!t) return t; const low=t.toLocaleLowerCase("pt-BR"); return low.charAt(0).toLocaleUpperCase("pt-BR")+low.slice(1); }
+/* quebra blocada: menor nº de linhas que cabe na largura, com linhas do tamanho mais parecido possível (sem viúva) */
+function blockLines(ctx, text, maxW, forceN){
+  const w=text.split(/\s+/).filter(Boolean); if(!w.length) return [];
+  const width=(i,j)=>ctx.measureText(w.slice(i,j).join(" ")).width;
+  const best=n=>{ // DP: minimiza a linha mais larga, desempata pela soma dos quadrados da folga
+    const N=w.length; if(n>N) n=N;
+    const memo=new Map();
+    const go=(i,k)=>{ const key=i+","+k; if(memo.has(key)) return memo.get(key);
+      let res; if(k===1){ const ww=width(i,N); res={max:ww, cost:0, cuts:[]}; }
+      else { res=null; for(let j=i+1;j<=N-k+1;j++){ const ww=width(i,j), r=go(j,k-1); const mx=Math.max(ww,r.max); const cand={max:mx, cost:r.cost+Math.pow(mx-ww,2), cuts:[j].concat(r.cuts)}; if(!res||cand.max<res.max-0.5||(Math.abs(cand.max-res.max)<=0.5&&cand.cost<res.cost)) res=cand; } }
+      memo.set(key,res); return res; };
+    const r=go(0,n); const lines=[]; let p=0; for(const c of r.cuts.concat([N])){ lines.push(w.slice(p,c).join(" ")); p=c; } return {lines, max:r.max};
+  };
+  if(forceN) return best(forceN).lines;
+  for(let n=1;n<=5;n++){ const r=best(n); if(r.max<=maxW || n===5) return r.lines; }
+}
+const bugTrim = new WeakMap();
+/* recorta o logo do PNG (os bugs da GNT vêm em tela cheia transparente, com o logo já na posição) */
+function trimmed(im){
+  if(bugTrim.has(im)) return bugTrim.get(im);
+  const c=document.createElement("canvas"); c.width=im.width; c.height=im.height; const x=c.getContext("2d"); x.drawImage(im,0,0);
+  let out={img:im, x0:0, y0:0, w:im.width, h:im.height, sw:im.width, sh:im.height, full:false};
+  try{ const d=x.getImageData(0,0,c.width,c.height).data; let x0=c.width,y0=c.height,x1=-1,y1=-1;
+    for(let y=0;y<c.height;y++) for(let xx=0;xx<c.width;xx++){ if(d[(y*c.width+xx)*4+3]>16){ if(xx<x0)x0=xx; if(xx>x1)x1=xx; if(y<y0)y0=y; if(y>y1)y1=y; } }
+    if(x1>x0 && y1>y0 && (x1-x0)<c.width*0.8){ const t=document.createElement("canvas"); t.width=x1-x0+1; t.height=y1-y0+1; t.getContext("2d").drawImage(im,x0,y0,t.width,t.height,0,0,t.width,t.height); out={img:t, x0, y0, w:t.width, h:t.height, sw:im.width, sh:im.height, full:true}; }
+  }catch(e){}
+  bugTrim.set(im,out); return out;
+}
+let bugAnim=null; // {meta, img}
+function bugRect(W, H, fmt, j){
+  // devolve onde o logo parado fica neste formato, e qual recorte usar
+  const t9=bugImgs["9x16"]&&trimmed(bugImgs["9x16"]), t34=(bugImgs["4x5"]||bugImgs["3x4"])&&trimmed(bugImgs["4x5"]||bugImgs["3x4"]), t11=bugImgs["1x1"]&&trimmed(bugImgs["1x1"]), ta=bugImgs.any&&trimmed(bugImgs.any);
+  const any = t9||t34||t11||ta||(logoImg&&{img:logoImg,w:logoImg.width,h:logoImg.height,full:false});
+  if(!any && !bugAnim) return null;
+  const ref = any || {img:null, w:bugAnim.meta.F[2]-bugAnim.meta.F[0], h:bugAnim.meta.F[3]-bugAnim.meta.F[1]};
+  if(j.fmt==="Tarja Sensacionalista"){ const bw=W*0.1415, bh=bw*ref.h/ref.w, cy=H*(fmt==="9x16"?0.93:0.925); return {t:ref, x:(W-bw)/2, y:cy-bh/2, w:bw, h:bh}; }
+  const k=W/1080;
+  const byPng = (t)=>({t, x:(t.x0/t.sw)*W, y:(t.y0/t.sw)*W*(t.sw/1080)*(1080/t.sw), w:t.w*W/t.sw, h:t.h*W/t.sw});
+  if(fmt==="9x16" && t9 && t9.full) return {t:t9, x:t9.x0*W/t9.sw, y:t9.y0*H/t9.sh, w:t9.w*W/t9.sw, h:t9.h*W/t9.sw};
+  const src = (fmt==="1x1" && t11 && t11.full) ? t11 : (t34 && t34.full ? t34 : null);
+  if(src){ const right=(src.sw-(src.x0+src.w))*W/src.sw, top=src.y0*W/src.sw; const bw=src.w*W/src.sw, bh=src.h*W/src.sw; return {t:src, x:W-right-bw, y:top, w:bw, h:bh}; }
+  if(t9 && t9.full){ const bw=t9.w*W/t9.sw, bh=t9.h*W/t9.sw; return {t:t9, x:W-W*0.075-bw, y:fmt==="9x16"?t9.y0*H/t9.sh:W*0.06, w:bw, h:bh}; }
+  const bw=W*0.141, bh=bw*ref.h/ref.w; return {t:ref, x:W-W*0.075-bw, y:fmt==="9x16"?H*0.153-bh/2:W*0.06, w:bw, h:bh};
+}
+function drawBug(ctx, W, H, fmt, j, oT){
+  const P=bugRect(W,H,fmt,j); if(!P) return;
+  if(bugAnim && oT!=null){ const m=bugAnim.meta, fi=Math.floor(oT*m.fps);
+    if(fi < m.frames){ const Fw=m.F[2]-m.F[0], k=P.w/Fw; const ux=P.x-(m.F[0]-m.U[0])*k, uy=P.y-(m.F[1]-m.U[1])*k;
+      const sx=(fi%m.cols)*m.fw, sy=Math.floor(fi/m.cols)*m.fh; ctx.drawImage(bugAnim.img, sx, sy, m.fw, m.fh, ux, uy, m.fw*k, m.fh*k); return; } }
+  if(P.t && P.t.img) ctx.drawImage(P.t.img, P.x, P.y, P.w, P.h);
+}
+function drawSubtitle(ctx, W, H, fmt, j, c, yFrac){
+  const fs=Math.round(W*0.045); ctx.font=`600 ${fs}px ${FONT()}`; ctx.textAlign="center"; ctx.textBaseline="top";
+  const lines=c.text.length>28 ? blockLines(ctx, c.text, W*0.8, 2) : [c.text], lh=fs*1.18;
+  const y0=H*yFrac - (lines.length*lh)/2;
+  ctx.lineJoin="round"; ctx.miterLimit=2; ctx.lineWidth=Math.max(2, W/1080*6); ctx.strokeStyle="rgba(0,0,0,.85)"; ctx.fillStyle="#fff";
+  lines.forEach((l,i)=>{ ctx.strokeText(l, W/2, y0+i*lh); ctx.fillText(l, W/2, y0+i*lh); });
+}
+/* rosto do talento no quadro de saída, pra tarja nunca cobrir */
+function facesInOut(j, fmt, W, H, t0, t1){
+  const rects=[];
+  for(const s of (j.samples||[])){ const o=srcToOut(j,s.t); if(o==null||o<t0||o>t1) continue; const r=cropRect(j,fmt,s.t);
+    for(const f of s.f){ const x=(f[0]*r.sw - r.x)/r.cw*W, y=(f[1]*r.sh - r.y)/r.ch*H, w=f[2]*r.sw/r.cw*W, h=f[3]*r.sh/r.ch*H; if(x+w/2<0||x-w/2>W) continue; rects.push({x0:x-w*0.6, x1:x+w*0.6, y0:y-h*0.65, y1:y+h*0.6}); } }
+  return rects;
+}
+const posCache=new Map();
+function tarjaTop(j, fmt, W, H, bw, bh, defaultTop){
+  const key=[j.id,fmt,W,H,Math.round(bw),Math.round(bh),(j.kfs||[]).map(k=>k.cx.toFixed(3)).join(","),segsOf(j).map(s=>s.in+"-"+s.out).join(",")].join("|");
+  if(posCache.has(key)) return posCache.get(key);
+  const bx0=(W-bw)/2, bx1=bx0+bw, faces=facesInOut(j,fmt,W,H,0,4.6);
+  let top=defaultTop;
+  const hits=t=>faces.some(f=>!(bx1<f.x0||bx0>f.x1||t+bh<f.y0||t>f.y1));
+  if(hits(top)){ const below=Math.max(...faces.filter(f=>!(bx1<f.x0||bx0>f.x1)).map(f=>f.y1))+H*0.015; if(below+bh<H*0.66) top=below; else { const above=Math.min(...faces.map(f=>f.y0))-H*0.015-bh; if(above>H*0.16) top=above; } }
+  posCache.set(key,top); return top;
+}
 function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   const r=cropRect(j, fmt, tSrc);
   ctx.save(); ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
   ctx.drawImage(video, r.x, r.y, r.cw, r.ch, 0, 0, W, H);
-  const sx=W/r.cw, sy=H/r.ch;
+  const sy=H/r.ch;
   if(j.mask && j.mask.on){
     const my=(j.mask.y/100)*r.sh, mh=(j.mask.h/100)*r.sh;
     const dy=(my-r.y)*sy, dh=mh*sy;
     if(dy+dh>0 && dy<H){ ctx.save(); ctx.beginPath(); ctx.rect(0,dy,W,dh); ctx.clip(); ctx.filter=`blur(${Math.round(W*0.035)}px)`; ctx.drawImage(video, r.x, r.y, r.cw, r.ch, -W*0.05, 0, W*1.1, H); ctx.filter="none"; ctx.fillStyle="rgba(0,0,0,.12)"; ctx.fillRect(0,dy,W,dh); ctx.restore(); }
   }
-  if(!o.clean){
-    const oT = o.outT!=null ? o.outT : (srcToOut(j,tSrc)||0);
-    // tarja
-    if(j.fmt==="Vídeo Aspas" && j.tarja){
-      const fs=Math.round(W*0.058); ctx.font=`700 ${fs}px "Bricolage Grotesque", "DM Sans", sans-serif`;
-      const lines=wrapPx(ctx, "“"+j.tarja.replace(/^["“]|["”]$/g,"")+"”", W*0.78);
-      const pad=fs*0.55, bh=lines.length*fs*1.18+pad*2, bw=Math.max(...lines.map(l=>ctx.measureText(l).width))+pad*2;
-      const ty = H*(fmt==="9x16"?0.13:0.08), p=clamp(oT/0.45,0,1), ease=1-Math.pow(1-p,3);
-      ctx.globalAlpha=ease; const bx=(W-bw)/2 - (1-ease)*W*0.08;
-      ctx.fillStyle=settings.tarjaColor||"#7b3ff2"; roundRect(ctx,bx,ty,bw,bh,fs*0.3); ctx.fill();
-      ctx.fillStyle="#fff"; ctx.textBaseline="top"; ctx.textAlign="left";
-      lines.forEach((l,i)=>ctx.fillText(l, bx+pad, ty+pad+i*fs*1.18)); ctx.globalAlpha=1;
-    }
-    // legenda
-    const c=cueAt(j,tSrc);
-    if(c && c.text.trim()){
-      const fs=Math.round(W*(fmt==="9x16"?0.048:0.044)); ctx.font=`700 ${fs}px "DM Sans", sans-serif`; ctx.textAlign="center"; ctx.textBaseline="top";
-      const lines=balance2(c.text), lh=fs*1.22;
-      if(j.fmt==="Produtizado"){
-        const y0=H*(fmt==="9x16"?0.6:0.66);
-        ctx.lineJoin="round"; ctx.lineWidth=fs*0.22; ctx.strokeStyle="rgba(0,0,0,.85)"; ctx.fillStyle="#fff";
-        lines.forEach((l,i)=>{ ctx.strokeText(l, W/2, y0+i*lh); ctx.fillText(l, W/2, y0+i*lh); });
-      } else {
-        const pad=fs*0.45, bw=Math.max(...lines.map(l=>ctx.measureText(l).width))+pad*2, bh=lines.length*lh+pad*1.3;
-        const y0=H*(fmt==="9x16"?0.7:fmt==="4x5"?0.78:0.8)-bh/2;
-        ctx.fillStyle="#fff"; roundRect(ctx,(W-bw)/2,y0,bw,bh,fs*0.25); ctx.fill();
-        ctx.fillStyle="#111"; lines.forEach((l,i)=>ctx.fillText(l, W/2, y0+pad*0.65+i*lh));
-      }
-    }
-    if(logoImg){ const lw=W*0.13, lh=lw*logoImg.height/logoImg.width; ctx.drawImage(logoImg, W-lw-W*0.045, W*0.045, lw, lh); }
+  if(o.clean){ ctx.restore(); return; }
+  const oT = o.outT!=null ? o.outT : (srcToOut(j,tSrc)||0);
+  const tarja = caixaBaixa(j.tarja);
+  const c = cueAt(j,tSrc);
+  let subY = fmt==="9x16"?0.72:fmt==="4x5"?0.8:0.8;
+
+  if(j.fmt==="Tarja Sensacionalista" && tarja){
+    const [bg,fg] = SENS_CORES[j.tarjaCor] || SENS_CORES.roxa;
+    const bandH = H*(fmt==="9x16"?0.213:fmt==="4x5"?0.18:0.19);
+    ctx.fillStyle=bg; ctx.fillRect(0,0,W,bandH);
+    const fs=Math.round(W*0.053); ctx.font=`600 ${fs}px ${FONT()}`; ctx.fillStyle=fg; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    const lines=blockLines(ctx, tarja, W*0.84, 2), lh=fs*1.16;
+    const lastBase = bandH - (fmt==="9x16" ? H*0.0135 : fs*0.55);
+    lines.forEach((l,i)=>ctx.fillText(l, W/2, lastBase-(lines.length-1-i)*lh));
   }
+  // Contexto e Aspas: fixas na abertura, 4 s de leitura, só movimento de saída (texto some, caixa sobe e sai)
+  const HOLD=4.0, OUT=0.6, outP=clamp((oT-HOLD)/OUT,0,1);
+  if((j.fmt==="Tarja de Contexto"||j.fmt==="Vídeo Aspas") && tarja && oT<HOLD+OUT){
+    const aspas=j.fmt==="Vídeo Aspas";
+    const fs=Math.round(W*0.0463); ctx.font=`600 ${fs}px ${FONT()}`; ctx.textBaseline="alphabetic"; ctx.textAlign="center";
+    const lines=blockLines(ctx, tarja, W*0.62), lh=fs*1.1, padX=W*0.021, padY=W*0.0185;
+    const bw=Math.max(...lines.map(l=>ctx.measureText(l).width))+padX*2, bh=lines.length*lh+padY*2-fs*0.1;
+    const top0 = tarjaTop(j, fmt, W, H, bw, bh, H*0.5-bh/2);
+    const lift = outP*H*0.012, boxA = outP>0.7 ? 1-(outP-0.7)/0.3 : 1, txtA = 1-clamp(outP/0.7,0,1);
+    const bx=(W-bw)/2, by=top0-lift;
+    ctx.globalAlpha=boxA; ctx.fillStyle=GNT.roxo; roundRect(ctx,bx,by,bw,bh,W*0.017); ctx.fill();
+    ctx.globalAlpha=txtA; ctx.fillStyle = aspas?GNT.lima:"#fff";
+    lines.forEach((l,i)=>ctx.fillText(l, W/2, by+padY+fs*0.8+i*lh));
+    if(aspas){ const qs=Math.round(fs*1.5); ctx.font=`600 ${qs}px ${FONT()}`; ctx.textAlign="left"; ctx.fillText("”", bx-qs*0.36, by+qs*0.55); ctx.textAlign="right"; ctx.fillText("”", bx+bw+qs*0.36, by+bh+qs*0.32); }
+    ctx.globalAlpha=1;
+  }
+  if(c && c.text.trim()){
+    if(j.fmt==="Produtizado") subY = fmt==="9x16"?0.62:0.68;
+    drawSubtitle(ctx, W, H, fmt, j, c, subY);
+  }
+  drawBug(ctx, W, H, fmt, j, oT);
   ctx.restore();
 }
 
@@ -1293,7 +1387,7 @@ function readBriefing(){
   const tj=t.match(/tarja:\s*["“]?([^"”\n]+)["”]?/i); if(tj) $("#tarjaIn").value=tj[1].trim();
   const ep=t.match(/\bep\.?\s*(\d+)/i); if(ep) $("#epIn").value=ep[1];
   if(/aspas?/i.test(t)) $("#tipoSel").value="aspa";
-  const fm=/produtizad/i.test(t)?"Produtizado":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null; if(fm) $("#fmtSel").value=fm;
+  const fm=/sensacionalista/i.test(t)?"Tarja Sensacionalista":/contexto/i.test(t)?"Tarja de Contexto":/produtizad/i.test(t)?"Produtizado":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null; if(fm) $("#fmtSel").value=fm;
   const outs=[...new Set((t.match(/\b(9x16|4x5|1x1)\b/gi)||[]).map(s=>s.toLowerCase()))];
   if(outs.length){ const key=["9x16","4x5","1x1"].filter(o=>outs.includes(o)).join(","); if([...$("#dimSel").options].some(o=>o.value===key)) $("#dimSel").value=key; }
   titleTouched=false; autoTitle();
@@ -1306,6 +1400,7 @@ function checkDur(){
   box.className="check "+(ok?"ok":"bad"); box.innerHTML=`<div><strong>${ok?"Duração dentro do padrão":"Duração fora do padrão"} · ${total<60?Math.round(total)+" s":Math.floor(total/60)+"min"+String(Math.round(total%60)).padStart(2,"0")}</strong>${L.label}${ok?"":". Revise o IN/OUT ou mude o tipo de corte."}</div>`;
 }
 $("#readBrief").addEventListener("click", readBriefing);
+$("#fmtSel").addEventListener("change", ()=>{ $("#corWrap").hidden = $("#fmtSel").value!=="Tarja Sensacionalista"; });
 $("#tipoSel").addEventListener("change", checkDur);
 $("#pickBruto").addEventListener("click", async ()=>{ const r=await pickFile(); if(!r) return; draft.file=r.file; draft.handle=r.handle; $("#brutoName").textContent=r.file.name+" · "+(r.file.size/1e9>=1?(r.file.size/1e9).toFixed(2)+" GB":Math.round(r.file.size/1e6)+" MB"); $("#dropBruto").classList.add("has"); });
 const dz=$("#dropBruto"); dz.addEventListener("dragover", e=>{ e.preventDefault(); }); dz.addEventListener("drop", async e=>{ e.preventDefault(); const it=e.dataTransfer.items&&e.dataTransfer.items[0]; let h=null; try{ if(it&&it.getAsFileSystemHandle) h=await it.getAsFileSystemHandle(); }catch(err){} const f=e.dataTransfer.files[0]; if(!f) return; draft.file=f; draft.handle=h&&h.kind==="file"?h:null; $("#brutoName").textContent=f.name; dz.classList.add("has"); });
@@ -1316,7 +1411,7 @@ $("#createJob").addEventListener("click", async ()=>{
   if(!draft.file) return toast("Escolha o bruto");
   const outs=$("#dimSel").value.split(",");
   ensureAudio();
-  const j={ id:newId(), titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, ep:$("#epIn").value.trim(), tipo:$("#tipoSel").value, fmt:$("#fmtSel").value, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim().replace(/^["“]|["”]$/g,""), briefing:$("#briefing").value,
+  const j={ id:newId(), titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, ep:$("#epIn").value.trim(), tipo:$("#tipoSel").value, fmt:$("#fmtSel").value, tarjaCor:$("#corSel").value, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim().replace(/^["“]|["”]$/g,""), briefing:$("#briefing").value,
     segs, cues:[], kfs:[], samples:[], thumbs:[], mask:{on:false,y:82,h:12}, smooth:false, status:"Em produção", stage:"novo", fileName:draft.file.name, post:null, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
   FILES[j.id]=draft.file; if(draft.handle) await idb.set("handles", j.id, draft.handle).catch(()=>{});
   JOBS.push(j); cur=j; await saveJob(j,true);
@@ -1358,7 +1453,8 @@ async function openRevisao(){
   $("#revBody").hidden=false; $("#revTitle").textContent=cur.titulo;
   if(!cur.outs.includes(pvFmt)) pvFmt=cur.outs[0]||"9x16";
   $("#pvFmt").innerHTML=Object.keys(FMTS).map(f=>`<button class="chip" data-pf="${f}" aria-pressed="${f===pvFmt}">${f}${cur.outs.includes(f)?"":" (prévia)"}</button>`).join("");
-  $("#fmtEd").innerHTML=["Vídeo Aspas","IN/OUT","Produtizado"].map(f=>`<option ${f===cur.fmt?"selected":""}>${f}</option>`).join("");
+  $("#fmtEd").innerHTML=FORMATOS.map(f=>`<option value="${f}" ${f===cur.fmt?"selected":""}>${f==="Vídeo Aspas"?"Tarja Aspas":f}</option>`).join("");
+  cur.tarjaCor = ({roxo:"roxa",branco:"branca-roxa"})[cur.tarjaCor] || cur.tarjaCor || "roxa"; $("#corEd").value = cur.tarjaCor; $("#corEd").hidden = cur.fmt!=="Tarja Sensacionalista";
   $("#tarjaEd").value=cur.tarja||""; tarjaCount();
   $("#smooth").checked=!!cur.smooth;
   const m=cur.mask||{on:false,y:82,h:12}; $("#maskOn").checked=m.on; $("#maskY").value=m.y; $("#maskH").value=m.h; maskLabels();
@@ -1366,7 +1462,7 @@ async function openRevisao(){
   const ok=await ensureFileUI("#revNeedFile"); if(ok){ outPos=clamp(outPos,0,outDur(cur)); await showAt(outPos); }
 }
 function maskLabels(){ $("#maskYv").textContent=$("#maskY").value+"%"; $("#maskHv").textContent=$("#maskH").value+"%"; }
-function tarjaCount(){ const w=($("#tarjaEd").value.trim().split(/\s+/).filter(Boolean)).length; $("#tarjaCount").textContent=w?w+" palavras":""; }
+function tarjaCount(){ const w=($("#tarjaEd").value.trim().split(/\s+/).filter(Boolean)).length; $("#tarjaCount").textContent=w?w+" palavras · sai em caixa baixa":""; }
 async function showAt(o){
   if(!cur||!video.src) return;
   const D=outDur(cur); outPos=clamp(o,0,D); const {t}=outToSrc(cur,outPos);
@@ -1407,7 +1503,8 @@ $("#smooth").addEventListener("change", e=>{ cur.smooth=e.target.checked; saveJo
 ["#maskY","#maskH"].forEach(s=>$(s).addEventListener("input", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; maskLabels(); draw(); saveJob(cur); }));
 $("#maskOn").addEventListener("change", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; draw(); saveJob(cur); });
 $("#tarjaEd").addEventListener("input", e=>{ cur.tarja=e.target.value; tarjaCount(); draw(); saveJob(cur); });
-$("#fmtEd").addEventListener("change", e=>{ cur.fmt=e.target.value; draw(); saveJob(cur); });
+$("#fmtEd").addEventListener("change", e=>{ cur.fmt=e.target.value; $("#corEd").hidden = cur.fmt!=="Tarja Sensacionalista"; draw(); saveJob(cur); });
+$("#corEd").addEventListener("change", e=>{ cur.tarjaCor=e.target.value; draw(); saveJob(cur); });
 
 function renderSegs(){
   $("#segList").innerHTML=segsOf(cur).map((s,i)=>`<div class="item" data-si="${i}"><div class="top"><b>Trecho ${i+1}</b>
@@ -1664,27 +1761,58 @@ $("#tomDetail").addEventListener("click", async e=>{ if(!e.target.closest("#refS
 
 /* ---------- configurações ---------- */
 function renderConfig(){
-  $("#apiKey").value=lsGet("apiKey",""); $("#apiModel").value=settings.apiModel; $("#asrModel").value=settings.asrModel; $("#tarjaColor").value=settings.tarjaColor; $("#handleIn").value=settings.handle;
-  $("#logoPv").hidden=!settings.logo; if(settings.logo) $("#logoPv").src=settings.logo;
+  $("#apiKey").value=lsGet("apiKey",""); $("#apiModel").value=settings.apiModel; $("#asrModel").value=settings.asrModel; $("#handleIn").value=settings.handle;
+  renderKit();
 }
 async function saveSettings(){ await idb.set("kv","settings",Object.assign({},settings)); }
 $("#apiKey").addEventListener("change", e=>{ lsSet("apiKey", e.target.value.trim()); toast("Chave salva neste navegador"); });
 $("#apiModel").addEventListener("change", e=>{ settings.apiModel=e.target.value.trim()||"claude-sonnet-5-5"; saveSettings(); });
 $("#asrModel").addEventListener("change", e=>{ settings.asrModel=e.target.value; saveSettings(); });
-$("#tarjaColor").addEventListener("change", e=>{ settings.tarjaColor=e.target.value.trim()||"#7b3ff2"; saveSettings(); });
 $("#handleIn").addEventListener("change", e=>{ const v=parseFloat(e.target.value.replace(",",".")); settings.handle=isNaN(v)?5:clamp(v,0,30); saveSettings(); });
-$("#logoIn").addEventListener("change", e=>{ const f=e.target.files[0]; if(!f) return; const rd=new FileReader(); rd.onload=()=>{ settings.logo=String(rd.result); loadLogo(); saveSettings(); renderConfig(); toast("Logo salvo"); }; rd.readAsDataURL(f); });
-$("#logoClear").addEventListener("click", ()=>{ settings.logo=null; logoImg=null; saveSettings(); renderConfig(); });
-function loadLogo(){ if(!settings.logo){ logoImg=null; return; } const im=new Image(); im.onload=()=>{ logoImg=im; }; im.src=settings.logo; }
+
+/* kit GNT: fontes e bugs ficam só neste navegador (não vão pro site público) */
+const KIT_SLOTS = [["font400","PP Mori Regular"],["font600","PP Mori SemiBold"],["bug9x16","Bug 9x16"],["bug4x5","Bug 4x5 / 3x4"],["bug1x1","Bug 1x1"],["bugany","Bug avulso (PNG só do logo)"],["buganim","Bug animado (entrada do logo)"]];
+function slotFor(name){
+  const n=name.toLowerCase();
+  if(/\.(otf|ttf|woff2?)$/.test(n)){ if(/semi ?bold|semibold|600/.test(n)) return "font600"; if(/regular|book|400/.test(n)) return "font400"; return /bold/.test(n)?"font600":"font400"; }
+  if(/\.json$/.test(n)) return "buganim";
+  if(/\.(png|webp)$/.test(n)){ if(/9x16|vertical/.test(n)) return "bug9x16"; if(/4x5|3x4/.test(n)) return "bug4x5"; if(/1x1|quadrad/.test(n)) return "bug1x1"; return "bugany"; }
+  return null;
+}
+async function addKitFiles(files){
+  let ok=0, skip=[];
+  for(const f of files){ const slot=slotFor(f.name); if(!slot){ skip.push(f.name); continue; } await idb.set("kv","kit_"+slot, {name:f.name, type:f.type, data:await f.arrayBuffer()}); ok++; }
+  await loadKit(); renderKit(); draw && cur && video.src && draw();
+  toast(ok?`${ok} arquivo${ok>1?"s":""} no kit${skip.length?" · ignorados: "+skip.join(", "):""}`:"Nenhum arquivo reconhecido");
+}
+async function loadKit(){
+  fontsReady=false; bugAnim=null; for(const k of Object.keys(bugImgs)) delete bugImgs[k];
+  for(const [slot] of KIT_SLOTS){
+    const it=await idb.get("kv","kit_"+slot).catch(()=>null); if(!it) continue;
+    if(slot.startsWith("font")){ try{ const ff=new FontFace("PP Mori", it.data, {weight: slot==="font600"?"600":"400"}); await ff.load(); document.fonts.add(ff); if(slot==="font600") fontsReady=true; }catch(e){ console.error(e); } }
+    else if(slot==="buganim"){ try{ const meta=JSON.parse(new TextDecoder().decode(it.data)); if(meta.tipo==="gnt-bug-animado"){ const im=new Image(); await new Promise(r=>{ im.onload=r; im.onerror=r; im.src=meta.sprite; }); if(im.width) bugAnim={meta, img:im}; } }catch(e){ console.error(e); } }
+    else { const url=URL.createObjectURL(new Blob([it.data],{type:it.type||"image/png"})); const im=new Image(); await new Promise(r=>{ im.onload=r; im.onerror=r; im.src=url; }); if(im.width) bugImgs[slot.replace("bug","")] = im; }
+  }
+  if(!fontsReady && await idb.get("kv","kit_font400").catch(()=>null)) fontsReady=true;
+}
+async function renderKit(){
+  const rows=[];
+  for(const [slot,label] of KIT_SLOTS){ const it=await idb.get("kv","kit_"+slot).catch(()=>null); rows.push(`<div><span>${label}</span><em>${it?esc(it.name)+` <button class="linkbtn" data-kitdel="${slot}">tirar</button>`:"não carregado"}</em></div>`); }
+  $("#kitList").innerHTML=rows.join("");
+}
+$("#kitIn").addEventListener("change", e=>{ addKitFiles([...e.target.files]); e.target.value=""; });
+$("#kitDrop").addEventListener("dragover", e=>e.preventDefault());
+$("#kitDrop").addEventListener("drop", e=>{ e.preventDefault(); addKitFiles([...e.dataTransfer.files]); });
+$("#kitList").addEventListener("click", async e=>{ const b=e.target.closest("[data-kitdel]"); if(!b) return; await idb.del("kv","kit_"+b.dataset.kitdel); await loadKit(); renderKit(); });
 
 /* ---------- início ---------- */
 (async()=>{
   const isChrome=!!(window.chrome && HTMLVideoElement.prototype.requestVideoFrameCallback);
   if(!isChrome) notice("Use o Google Chrome atualizado. Este navegador não tem tudo que o editor precisa.","bad");
-  settings=Object.assign({apiModel:"claude-sonnet-5-5", asrModel:"onnx-community/whisper-small", tarjaColor:"#7b3ff2", handle:5, logo:null}, await idb.get("kv","settings").catch(()=>null)||{});
+  settings=Object.assign({apiModel:"claude-sonnet-5-5", asrModel:"onnx-community/whisper-small", handle:5}, await idb.get("kv","settings").catch(()=>null)||{});
   REFS=await idb.get("kv","refs").catch(()=>null)||{};
   JOBS=(await idb.all("jobs").catch(()=>[]))||[];
-  loadLogo(); renderPainel(); renderPickers();
+  await loadKit(); renderPainel(); renderPickers();
   if(NO_AI) notice("Modo sem IA (teste): sem transcrição nem detector de rosto.","warn");
 })();
 
