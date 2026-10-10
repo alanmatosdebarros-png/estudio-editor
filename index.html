@@ -840,8 +840,9 @@ async function loadVideo(file, jobId){
   if(loadedFor===jobId && video.src) return;
   if(video.src) URL.revokeObjectURL(video.src);
   video.src = URL.createObjectURL(file); loadedFor = jobId;
-  await new Promise((res,rej)=>{ video.onloadedmetadata=()=>res(); video.onerror=()=>rej(new Error("O Chrome não conseguiu abrir esse arquivo de vídeo. Exporte o bruto em MP4 (H.264) e tente de novo.")); });
-  if(video.readyState<2) await new Promise(r=>{ video.onloadeddata=r; });
+  const fail="O Chrome não conseguiu abrir esse arquivo de vídeo. Exporte o bruto em MP4 (H.264) e tente de novo.";
+  await new Promise((res,rej)=>{ const to=setTimeout(()=>{ loadedFor=null; rej(new Error(fail)); }, 20000); video.onloadedmetadata=()=>{ clearTimeout(to); res(); }; video.onerror=()=>{ clearTimeout(to); loadedFor=null; rej(new Error(fail)); }; });
+  if(video.readyState<2) await new Promise((res,rej)=>{ const to=setTimeout(()=>{ loadedFor=null; rej(new Error(fail)); }, 20000); video.onloadeddata=()=>{ clearTimeout(to); res(); }; });
 }
 function seek(t){ return new Promise(res=>{ const done=()=>{ video.removeEventListener("seeked", done); res(); }; video.addEventListener("seeked", done); video.currentTime = clamp(t, 0, (video.duration||1e9)-0.05); }); }
 let abortRun = false;
@@ -1067,7 +1068,8 @@ async function analyze(j){
   let t1=performance.now(); const lap=()=>{ const s=Math.round((performance.now()-t1)/1000)+" s"; t1=performance.now(); return s; };
   step("brief","run");
   const file=await getFileFor(j); if(!file){ step("brief","err","Escolha o bruto de novo."); throw new Error("sem arquivo"); }
-  await loadVideo(file, j.id); ensureAudio();
+  try{ await loadVideo(file, j.id); }catch(e){ step("brief","err",e.message); throw e; }
+  ensureAudio();
   j.srcW=video.videoWidth; j.srcH=video.videoHeight; j.duration=video.duration;
   const bad = segsOf(j).filter(s=>s.in>=video.duration);
   if(bad.length){ step("brief","err",`O bruto tem ${fmtT(video.duration)}. O IN ${fmtT(bad[0].in)} passa do fim. Confira se é o arquivo certo.`); throw new Error("IN fora do vídeo"); }
