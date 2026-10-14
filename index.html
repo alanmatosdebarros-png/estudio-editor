@@ -2963,13 +2963,48 @@ $("#itEditar").addEventListener("click", async ()=>{
 /* decupagem por pedido */
 $("#itPedir").addEventListener("click", decupar);
 $("#itPedido").addEventListener("keydown", e=>{ if(e.key==="Enter") decupar(); });
+/* duração pedida em texto: "1 minuto e 30 segundos a 2 minutos e 30 segundos", "1:30 a 2:30", "de 60 a 90 s" */
+function segundosDe(txt){
+  txt=norm(txt).replace(/,/g,".");
+  let m=txt.match(/^\s*(\d+):(\d{2})\s*$/); if(m) return +m[1]*60+ +m[2];
+  let t=0, achou=false;
+  const mi=txt.match(/(\d+(?:\.\d+)?)\s*(min|minuto|minutos)\b/); if(mi){ t+=parseFloat(mi[1])*60; achou=true; }
+  const se=txt.match(/(\d+)\s*(s|seg|segundo|segundos)\b/); if(se){ t+=+se[1]; achou=true; }
+  if(!achou){ const n=txt.match(/^\s*(\d+(?:\.\d+)?)\s*$/); if(n){ t=parseFloat(n[1]); achou=true; } }
+  return achou?t:NaN;
+}
+function faixaDuracao(q){
+  const n=norm(q).replace(/(\d)(min|seg)/g,"$1 $2");
+  const UN="(?:\\d+:\\d{2}|\\d+(?:[.,]\\d+)?\\s*(?:minutos|minuto|min|segundos|segundo|seg|s)?(?:\\s*e\\s*\\d+\\s*(?:segundos|segundo|seg|s))?)";
+  const re=new RegExp("(?:de\\s+)?("+UN+")\\s*(?:a|ate|até|-|e no maximo)\\s*("+UN+")","g");
+  let m, ult=null; while((m=re.exec(n))){ let a=segundosDe(m[1]), b=segundosDe(m[2]);
+    if(!isNaN(b) && isNaN(a)) continue;
+    if(!/min|seg|\bs\b|:/.test(m[1]) && /min/.test(m[2])) a=a*60;   // "1 a 2 minutos"
+    if(!isNaN(a)&&!isNaN(b)&&b>a&&b<=1200) ult={min:Math.round(a), max:Math.round(b)}; }
+  if(ult) return ult;
+  const um=n.match(/(?:de|com|ter)\s+(\d+:\d{2}|\d+\s*(?:min|minuto|minutos|segundos|s)\b(?:\s*e\s*\d+\s*(?:s|segundos))?)/);
+  if(um){ const v=segundosDe(um[1]); if(!isNaN(v)) return {min:Math.round(v*0.85), max:Math.round(v*1.15)}; }
+  return null;
+}
+function quantidadePedida(q){ const m=norm(q).match(/\b(\d{1,2})\s+(trechos|cortes|momentos|cenas|videos|vídeos)/); return m?+m[1]:0; }
+/* estica ou encurta pela fala até caber na faixa pedida */
+function ajustarDuracao(it, s, e, fx){
+  const cs=(it.cues||[]).slice().sort((a,b)=>a.s-b.s);
+  if(e-s<fx.min){ for(const c of cs){ if(c.s>=e-0.05 && c.e-s<=fx.max){ e=c.e; if(e-s>=fx.min) break; } else if(c.s>=e-0.05) break; } }
+  if(e-s<fx.min){ for(let i=cs.length-1;i>=0;i--){ const c=cs[i]; if(c.e<=s+0.05 && e-c.s<=fx.max){ s=c.s; if(e-s>=fx.min) break; } else if(c.e<=s+0.05) break; } }
+  if(e-s>fx.max){ const ok=cs.filter(c=>c.e>s && c.e-s<=fx.max && c.e-s>=fx.min); if(ok.length) e=ok[ok.length-1].e; else e=s+fx.max; }
+  return [+s.toFixed(2), +e.toFixed(2)];
+}
 async function decupar(){
   const it=ITENS.find(i=>i.id===itemAtual); const q=$("#itPedido").value.trim(); if(!it||!q) return;
-  if(!/\b(trecho|trechos|decupa|decupagem|cortes?|preciso|separe|selecion)/i.test(q)){
+  if(false){
     const r=buscarMomentos(q,[it]); decupAtual={pedido:q, local:true, trechos:r.map(x=>({s:x.m.s, e:x.m.e, titulo:x.m.titulo||x.m.text||"", descricao:x.m.descricao||x.m.motivo||""}))}; renderDecup(); renderTl(); return;
   }
   if(!it.cues.length) return toast("Esse vídeo ainda não tem transcrição");
-  $("#itDecup").innerHTML=`<p class="status">Decupando: lendo a transcrição inteira e as cenas...</p>`;
+  if(!lsGet("apiKey","")){ go("config"); return toast("A decupagem usa a IA: cole a chave da API em Configurações"); }
+  const fx=faixaDuracao(q), qtd=quantidadePedida(q);
+  const regraDur = fx ? `- DURAÇÃO OBRIGATÓRIA: cada trecho tem entre ${fx.min} e ${fx.max} segundos (${mmss(fx.min)} a ${mmss(fx.max)}). Trecho fora disso é inválido: junte falas vizinhas do mesmo assunto até chegar na duração.` : `- Cada trecho entre 8 e 59 s.`;
+  $("#itDecup").innerHTML=`<p class="status">Decupando: lendo a transcrição inteira${fx?` · trechos de ${mmss(fx.min)} a ${mmss(fx.max)}`:""}${qtd?` · ${qtd} trechos`:""}...</p>`;
   const t=tituloDe(it), mk=it.marca, tom=mk==="gnt"?(PROGRAMAS[progDeTitulo(t)]?PROGRAMAS[progDeTitulo(t)].tom.join(" "):"Tom do GNT: afetuoso, próximo, humor leve."):tomMarca(mk).join(" ");
   try{
     const {text}=await callClaude({recurso:"Decupagem", marca:mk, max_tokens:8000, messages:[{role:"user", content:`Você é editor de cortes da conta ${MARCAS[mk].nome}. Título: ${t?t.nome:it.fileName}${it.ep?" · ep "+it.ep:""}.
@@ -2986,14 +3021,17 @@ ${(it.cenas||[]).map(c=>`${mmss(c.s)}-${mmss(c.e)} ${c.titulo} [${(c.tom||[]).jo
 JÁ USADOS (evite repetir): ${(it.usados||[]).map(u=>mmss(u.s)+"-"+mmss(u.e)).join(", ")||"nenhum"}
 
 REGRAS
-- Cada trecho entre 8 e 59 s, a não ser que o pedido diga outra duração.
+${regraDur}
+${qtd?`- Entregue exatamente ${qtd} trechos (ou o máximo possível, se o vídeo não tiver tantos bons).`:"- Entregue de 6 a 12 trechos, os melhores."}
+- Um trecho pode juntar várias falas seguidas, desde que seja um assunto só, com começo, meio e fim.
 - Começa no início de uma fala e termina no fim de uma fala, sem cortar palavra.
 - Ordem cronológica. Não invente nada que não esteja na fala. Não use travessão.
 - Em cada trecho: s, e (mm:ss), titulo (curto, como a equipe chamaria), descricao (o que acontece), motivo (por que vale post), tarja (até 11 palavras, no tom da marca).
 Responda só com JSON: {"trechos":[{"s":"","e":"","titulo":"","descricao":"","motivo":"","tarja":""}]}`}]});
     const js=parseJSON(text);
-    const trechos=(js.trechos||[]).map(x=>{ let s=parseT(x.s), e=parseT(x.e); if(isNaN(s)||isNaN(e)||e<=s) return null; [s,e]=encaixar(it,s,e); return {s,e,titulo:String(x.titulo||""),descricao:String(x.descricao||""),motivo:String(x.motivo||""),tarja:String(x.tarja||"")}; }).filter(Boolean);
-    decupAtual={pedido:q, trechos, em:new Date().toISOString()}; it.decup=(it.decup||[]).concat([decupAtual]).slice(-10); await saveItem(it);
+    const trechos=(js.trechos||[]).map(x=>{ let s=parseT(x.s), e=parseT(x.e); if(isNaN(s)||isNaN(e)||e<=s) return null; [s,e]=encaixar(it,s,e); if(fx) [s,e]=ajustarDuracao(it,s,e,fx); if(fx && (e-s<fx.min-2 || e-s>fx.max+2)) return null; return {s,e,titulo:String(x.titulo||""),descricao:String(x.descricao||""),motivo:String(x.motivo||""),tarja:String(x.tarja||"")}; }).filter(Boolean);
+    if(!trechos.length && (js.trechos||[]).length) toast(fx?`A IA mandou trechos fora de ${mmss(fx.min)} a ${mmss(fx.max)}. Tente de novo.`:"Nenhum trecho válido. Tente de novo.");
+    decupAtual={pedido:q, trechos, em:new Date().toISOString(), faixa:fx}; it.decup=(it.decup||[]).concat([decupAtual]).slice(-10); await saveItem(it);
     renderDecup(); renderTl();
   }catch(e){ $("#itDecup").innerHTML=`<p class="status">Não deu pra decupar: ${esc(e.message)}</p>`; }
 }
@@ -3001,7 +3039,7 @@ function renderDecup(){
   const box=$("#itDecup"); if(!decupAtual||!decupAtual.trechos){ box.innerHTML=""; return; }
   const ts=decupAtual.trechos;
   box.innerHTML=`<div class="card" style="width:100%;padding:14px"><div class="head" style="align-items:center"><div><b>${decupAtual.local?"Busca":"Decupagem"}:</b> <span class="small muted">“${esc(decupAtual.pedido)}” · ${ts.length} trecho${ts.length===1?"":"s"}</span></div><div class="row">${ts.length?`<button class="btn sm" id="dcTodos">Marcar todos</button>`:""}<button class="btn sm ghost" id="dcFechar">×</button></div></div>
-    <div class="list" style="margin-top:10px">${ts.map((c,i)=>`<div class="drow"><span class="n">${i+1}</span><button class="linkbtn mono small tc" data-dgo="${i}" style="color:var(--accent-2);text-align:left">${mmss(c.s)}–${mmss(c.e)} · ${Math.round(c.e-c.s)} s</button><div><b>${esc(c.titulo)}</b><small>${esc(c.descricao)}</small>${c.motivo?`<small>✦ ${esc(c.motivo)}</small>`:""}</div><button class="btn sm" data-dmarc="${i}">⚑ Marcar</button></div>`).join("")||`<div class="empty">Nada encontrado.</div>`}</div></div>`;
+    <div class="list" style="margin-top:10px">${ts.map((c,i)=>`<div class="drow"><span class="n">${i+1}</span><button class="linkbtn mono small tc" data-dgo="${i}" style="color:var(--accent-2);text-align:left">${mmss(c.s)}–${mmss(c.e)} · ${c.e-c.s>=60?mmss(c.e-c.s):Math.round(c.e-c.s)+" s"}</button><div><b>${esc(c.titulo)}</b><small>${esc(c.descricao)}</small>${c.motivo?`<small>✦ ${esc(c.motivo)}</small>`:""}</div><button class="btn sm" data-dmarc="${i}">⚑ Marcar</button></div>`).join("")||`<div class="empty">Nada encontrado.</div>`}</div></div>`;
 }
 $("#itDecup").addEventListener("click", async e=>{
   const it=ITENS.find(i=>i.id===itemAtual); if(e.target.id==="dcFechar"){ decupAtual=null; renderDecup(); renderTl(); return; }
@@ -3021,6 +3059,7 @@ async function mandarPraProducao(it, trechos, o={}){
   if([...$("#progSel").options].some(x=>x.value===pg)) $("#progSel").value=pg;
   $("#epIn").value=it.ep||"";
   renderRows(trechos.map(c=>({a:showT(c.s), b:showT(c.e)})));
+  const tot=trechos.reduce((x,c)=>x+(c.e-c.s),0); $("#tipoSel").value = tot<=59?"aspa":tot<=150?"trecho":"longo"; checkDur();
   if(o.tarja!=null) $("#tarjaIn").value=o.tarja||"";
   if(o.fmt && formatosDe(MARCA).includes(o.fmt)){ $("#fmtSel").value=o.fmt; fmtSelChanged(); }
   const h=await idb.get("handles","a:"+it.id).catch(()=>null);
