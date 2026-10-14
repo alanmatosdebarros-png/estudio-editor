@@ -686,7 +686,7 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
   <!-- ITEM DO ACERVO -->
   <section class="view wrap" id="v-item" hidden>
     <div class="head"><div><div class="eyebrow" id="itEyebrow">Acervo</div><h1 id="itTitulo">Título</h1><p class="small muted" id="itSub"></p></div>
-      <div class="row"><button class="btn" data-go="acervo">← Voltar</button><button class="btn" id="itEditar">Editar dados</button></div></div>
+      <div class="row"><button class="btn" data-go="acervo">← Voltar</button><button class="btn" id="itEditar">Editar dados</button><button class="btn ghost" id="itApagar">Apagar</button></div></div>
     <div id="itNeedFile" class="notice warn" hidden></div>
     <div class="grid-r">
       <div class="stage">
@@ -2736,10 +2736,10 @@ function renderIngest(){
   const ts=TITULOS.filter(t=>t.marca===MARCA).sort((a,b)=>a.nome.localeCompare(b.nome));
   box.innerHTML=`<div class="head" style="align-items:center"><div><h2>Subir no acervo de ${esc(MARCAS[MARCA].nome)}</h2><p class="sub">${fila.length} arquivo${fila.length>1?"s":""}: ${esc(fila.map(f=>f.file.name).join(", "))}. O arquivo fica no seu computador; o Estúdio lê direto dele.</p></div><button class="btn sm ghost" id="ingCancel">Cancelar</button></div>
     <div class="grid3" style="margin-top:12px">
-      <label class="f">Título<select id="ingTit"><option value="">A IA identifica pelo nome e pelas falas</option>${ts.map(t=>`<option value="${t.id}">${esc(t.nome)}</option>`).join("")}<option value="__novo">+ Novo título</option></select></label>
+      <label class="f">Título<select id="ingTit"><option value="">A IA identifica pelo nome e pelas falas</option>${ts.map(t=>`<option value="${t.id}">${esc(t.nome)}</option>`).join("")}${MARCA==="gnt"?ORDER.filter(k=>!ts.some(t=>norm(t.nome)===norm(PROGRAMAS[k].nome))).map(k=>`<option value="prog:${k}">${esc(PROGRAMAS[k].nome)}</option>`).join(""):""}<option value="__novo">+ Novo título</option></select></label>
       <label class="f" id="ingNovoW" hidden>Nome do novo título<input type="text" id="ingNovo"></label>
       <label class="f">Tipo<select id="ingTipo"><option value="programa">Programa</option><option value="filme">Filme</option><option value="serie">Série</option></select></label>
-      <label class="f">Episódio${fila.length>1?" (o primeiro; os outros seguem a ordem)":""}<input type="text" id="ingEp" placeholder="ex.: 3"></label>
+      <label class="f">Episódio (só o número)${fila.length>1?", o primeiro; os outros seguem a ordem":""}<input type="text" id="ingEp" inputmode="numeric" placeholder="ex.: 3"></label>
     </div>
     <div class="row" style="margin-top:12px;gap:16px">
       <label class="row" style="gap:8px"><input type="checkbox" id="ingImg" checked> a IA olha as imagens das cenas (acha pela imagem; custa mais)</label>
@@ -2753,6 +2753,7 @@ $("#acvIngest").addEventListener("click", async e=>{
   if(e.target.id==="ingCancel"){ fila=[]; renderIngest(); return; }
   if(e.target.id!=="ingGo") return;
   let tid=$("#ingTit").value, tipo=$("#ingTipo").value;
+  if(tid.startsWith("prog:")){ const k=tid.slice(5); const t={id:nid("t"), marca:MARCA, nome:PROGRAMAS[k].nome, tipo:"programa", criadoEm:new Date().toISOString()}; TITULOS.push(t); await saveTitulo(t); tid=t.id; }
   if(tid==="__novo"){ const n=$("#ingNovo").value.trim(); if(!n) return toast("Dê um nome ao título"); const t={id:nid("t"), marca:MARCA, nome:n, tipo, criadoEm:new Date().toISOString()}; TITULOS.push(t); await saveTitulo(t); tid=t.id; }
   const ep0=$("#ingEp").value.trim(), img=$("#ingImg").checked, ia=$("#ingIA").checked;
   const novos=[];
@@ -2775,19 +2776,26 @@ async function processarItem(it){
     const ats=await input.getAudioTracks(); let at=ats.find(a=>/^(por|pt)/i.test(a.languageCode||"")) || await input.getPrimaryAudioTrack();
     it.faixa=at?((at.languageCode&&at.languageCode!=="und")?at.languageCode:"faixa principal")+(ats.length>1?` (de ${ats.length} faixas)`:""):"sem áudio";
     if(vt){ it.w=vt.displayWidth; it.h=vt.displayHeight; }
+    try{ it.codec={video:vt?(await vt.getCodecParameterString().catch(()=>vt.codec))||vt.codec:null, audio:at?(await at.getCodecParameterString().catch(()=>at.codec))||at.codec:null}; }catch(e){}
     await saveItem(it);
-    // miniaturas
-    if(vt){ progItem(it,"miniaturas"); const sink=new M.CanvasSink(vt,{width:320, fit:"contain", poolSize:2}); const times=[]; for(let t=0;t<it.dur;t+=THUMB_STEP) times.push(t); const list=[];
-      for await (const w of sink.canvasesAtTimestamps(times)){ list.push(w?w.canvas.toDataURL("image/jpeg",0.6):""); if(list.length%40===0) progItem(it,`miniaturas ${Math.round(list.length/times.length*100)}%`); }
+    // miniaturas: decodifica direto do arquivo; se o decodificador do Chrome recusar, tira pelo player
+    if(vt){ progItem(it,"miniaturas"); const times=[]; for(let t=0;t<it.dur;t+=THUMB_STEP) times.push(t); let list=[];
+      let direto = await vt.canDecode().catch(()=>false);
+      if(direto){ try{ const sink=new M.CanvasSink(vt,{width:320, fit:"contain", poolSize:2});
+          for await (const w of sink.canvasesAtTimestamps(times)){ list.push(w?w.canvas.toDataURL("image/jpeg",0.6):""); if(list.length%40===0) progItem(it,`miniaturas ${Math.round(list.length/times.length*100)}%`); } }
+        catch(err){ console.warn("miniaturas direto", err); direto=false; } }
+      if(!direto){ list=await thumbsPeloPlayer(file, times, p=>progItem(it,`miniaturas pelo player ${Math.round(p*100)}%`)); }
       THUMBS[it.id]={step:THUMB_STEP, list}; await idb.set("thumbs", it.id, THUMBS[it.id]).catch(()=>{});
     }
     // transcrição
     if(at && !NO_AI){
       progItem(it,"preparando a transcrição"); await loadAsr(m=>progItem(it,m));
-      const sink=new M.AudioBufferSink(at); const W=240; let words=[];
-      for(let a=0;a<it.dur;a+=W-1){ const b=Math.min(it.dur,a+W); progItem(it,`transcrevendo ${mmss(a)} de ${mmss(it.dur)}`);
-        const chunks=[]; let rate=48000, t0=null;
-        for await (const {buffer,timestamp} of sink.buffers(a,b)){ if(t0==null) t0=timestamp; rate=buffer.sampleRate; const L=buffer.getChannelData(0), R=buffer.numberOfChannels>1?buffer.getChannelData(1):L; const mm=new Float32Array(L.length); for(let i=0;i<L.length;i++) mm[i]=(L[i]+R[i])/2; chunks.push(mm); }
+      let audDireto = await at.canDecode().catch(()=>false); const sink=audDireto?new M.AudioBufferSink(at):null; const W=240; let words=[];
+      for(let a=0;a<it.dur;a+=W-1){ const b=Math.min(it.dur,a+W); progItem(it,`transcrevendo ${mmss(a)} de ${mmss(it.dur)}${audDireto?"":" (áudio pelo player, em tempo real)"}`);
+        let chunks=[], rate=48000, t0=null;
+        if(audDireto){ try{ for await (const {buffer,timestamp} of sink.buffers(a,b)){ if(t0==null) t0=timestamp; rate=buffer.sampleRate; const L=buffer.getChannelData(0), R=buffer.numberOfChannels>1?buffer.getChannelData(1):L; const mm=new Float32Array(L.length); for(let i=0;i<L.length;i++) mm[i]=(L[i]+R[i])/2; chunks.push(mm); } }
+          catch(err){ console.warn("áudio direto", err); audDireto=false; chunks=[]; t0=null; } }
+        if(!audDireto){ const r=await audioPeloPlayer(file, a, b); chunks=r.chunks; rate=r.rate; t0=a; }
         if(!chunks.length) continue; const pcm=await resample16k(chunks, rate); const off=t0==null?a:t0;
         let ws=null; try{ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:"word", chunk_length_s:30, stride_length_s:5}); ws=(out.chunks||[]).filter(c=>c.timestamp&&c.timestamp[0]!=null).map(c=>({text:c.text, s:off+c.timestamp[0], e:off+(c.timestamp[1]!=null?c.timestamp[1]:c.timestamp[0]+0.3)})); }
         catch(err){ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:true, chunk_length_s:30, stride_length_s:5}); ws=[]; (out.chunks||[]).forEach(c=>{ const s0=off+(c.timestamp[0]||0), e0=off+(c.timestamp[1]!=null?c.timestamp[1]:(c.timestamp[0]||0)+4); const tk=String(c.text||"").trim().split(/\s+/).filter(Boolean); tk.forEach((w,i)=>ws.push({text:w, s:s0+(e0-s0)*i/tk.length, e:s0+(e0-s0)*(i+1)/tk.length})); }); }
@@ -2804,6 +2812,25 @@ async function processarItem(it){
     toast(`${nomeItem(it)} entrou no acervo: ${(it.cenas||[]).length} cenas e ${(it.sugeridos||[]).length} momentos sugeridos`);
   }catch(e){ console.error(e); it.status="erro"; it.etapa=e.message||String(e); await saveItem(it); notice(`Acervo · ${nomeItem(it)}: ${it.etapa}`,"bad"); }
   if(view==="acervo") PLAT.acervo(); if(view==="item"&&itemAtual===it.id) PLAT.item();
+}
+/* plano B: quando o decodificador direto do Chrome recusa o arquivo (ex.: vídeo entrelaçado de TV), usa o player */
+const pvid=document.createElement("video"); pvid.muted=false; pvid.preload="auto"; pvid.playsInline=true; let pSrcNode=null, pFile=null;
+async function pvidLoad(file){ if(pFile===file && pvid.src) return; if(pvid.src) URL.revokeObjectURL(pvid.src); pvid.src=URL.createObjectURL(file); pFile=file; await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error("o Chrome não consegue abrir esse arquivo. Exporte em MP4 (H.264, progressivo) e suba de novo.")),20000); pvid.onloadeddata=()=>{ clearTimeout(to); res(); }; pvid.onerror=()=>{ clearTimeout(to); rej(new Error("o Chrome não consegue abrir esse arquivo. Exporte em MP4 (H.264, progressivo) e suba de novo.")); }; }); }
+async function thumbsPeloPlayer(file, times, onp){
+  await pvidLoad(file); const c=document.createElement("canvas"); c.width=320; c.height=Math.round(320*(pvid.videoHeight||9)/(pvid.videoWidth||16)); const x=c.getContext("2d"); const list=[];
+  for(let i=0;i<times.length;i++){ await new Promise(r=>{ const to=setTimeout(r,4000); pvid.onseeked=()=>{ clearTimeout(to); r(); }; pvid.currentTime=Math.min(times[i], (pvid.duration||1e9)-0.1); }); x.drawImage(pvid,0,0,c.width,c.height); list.push(c.toDataURL("image/jpeg",0.6)); if(i%20===0) onp&&onp(i/times.length); }
+  return list;
+}
+async function audioPeloPlayer(file, a, b){
+  await pvidLoad(file); ensureAudio(); await ensureWorklet();
+  if(!pSrcNode){ pSrcNode=actx.createMediaElementSource(pvid); }
+  const node=new AudioWorkletNode(actx,"cap",{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[1]}), z=actx.createGain(); z.gain.value=0; const chunks=[];
+  node.port.onmessage=e=>chunks.push(e.data); pSrcNode.connect(node); node.connect(z); z.connect(actx.destination);
+  await new Promise(r=>{ pvid.onseeked=r; pvid.currentTime=a; setTimeout(r,4000); });
+  node.port.postMessage(true); await pvid.play().catch(()=>{});
+  await new Promise(r=>{ const tick=()=>{ if(pvid.currentTime>=b-0.02 || pvid.ended || pvid.paused) return r(); requestAnimationFrame(tick); }; tick(); setTimeout(r,(b-a)*1000+15000); });
+  pvid.pause(); node.port.postMessage(false); await sleep(120); pSrcNode.disconnect(node); node.disconnect(); z.disconnect();
+  return {chunks, rate:actx.sampleRate};
 }
 const linhaCue = c => `[${mmss(c.s)}] ${c.text}`;
 async function entenderItem(it){
@@ -2978,6 +3005,13 @@ function marcarUsado(j){
   if(o.ideiaId && typeof IDEIAS==="object"){ const id=IDEIAS.find(x=>x.id===o.ideiaId); if(id){ id.status="job"; id.jobId=j.id; saveIdeia(id); } }
   if(j.trello) j.marca=j.marca||MARCA;
 }
+
+$("#itApagar").addEventListener("click", async ()=>{
+  const it=ITENS.find(i=>i.id===itemAtual); if(!it) return; if(!confirm(`Apagar “${nomeItem(it)}” do acervo? O arquivo de vídeo no seu computador não é apagado.`)) return;
+  ITENS=ITENS.filter(i=>i.id!==it.id); delete THUMBS[it.id]; delete FILES["a:"+it.id];
+  await idb.del("acervo",it.id).catch(()=>{}); await idb.del("thumbs",it.id).catch(()=>{}); await idb.del("handles","a:"+it.id).catch(()=>{});
+  itemAtual=null; go("acervo"); toast("Apagado do acervo");
+});
 /* ================================================================
    FÁBRICA DE MEMES + POTENCIAL
    aperta um botão, chega uma ideia pronta, no formato da marca,
