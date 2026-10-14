@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>Estúdio · Editor</title>
+<title>Estúdio de Conteúdo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -284,6 +284,17 @@ input[type=checkbox]{accent-color:var(--accent)}
 .mom .top{gap:6px}
 .mom select{min-width:150px}
 @media (max-width:900px){ #revBody > .stage{position:static} }
+/* plataforma: barra lateral fixa com rolagem própria */
+.app{grid-template-columns:216px minmax(0,1fr)}
+.side{position:sticky;top:0;height:100vh;overflow-y:auto;gap:2px}
+.side .nav{padding:8px 10px;font-size:13.5px}
+@media (max-width:720px){
+  .app{grid-template-columns:minmax(0,1fr)}
+  .side{position:sticky;height:auto;z-index:5;background:var(--bg)}
+  .navh{display:none}
+  .brandsw{display:flex;margin:0 8px 0 0;flex:none}
+  .brandsw button{flex-direction:row;padding:6px 8px}
+}
 </style>
 </head>
 <body>
@@ -336,18 +347,103 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
 .drop{border:1px dashed var(--line);border-radius:var(--r-sm);padding:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .drop.has{border-style:solid}
 .drop strong{overflow-wrap:anywhere}
+
+/* plataforma */
+.brandsw{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:4px;margin:4px 0 6px}
+.brandsw button{border:0;background:transparent;color:var(--muted);font-size:11px;font-weight:700;padding:7px 2px;border-radius:9px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px}
+.brandsw button i{width:18px;height:18px;border-radius:6px;display:block}
+.brandsw button[aria-pressed="true"]{background:var(--bg);color:#fff;box-shadow:0 0 0 1px var(--line)}
+.navh{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--faint);margin:14px 12px 4px;font-weight:700}
+.navn{margin-left:auto;font-size:10px;font-weight:700;background:var(--accent);color:#fff;border-radius:999px;padding:1px 7px}
+.navn:empty{display:none}
+.nav{display:flex;align-items:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.grid3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.fab-hero{text-align:center;display:flex;flex-direction:column;align-items:center;gap:12px;padding:34px 22px}
+.fab-hero h1{font-size:clamp(30px,4vw,46px)}
+.fab-btn{position:relative;border:0;border-radius:18px;padding:5px;background:repeating-linear-gradient(135deg,#111 0 12px,#ffc21a 12px 24px);cursor:pointer;transition:transform .08s}
+.fab-btn span{display:block;background:linear-gradient(135deg,var(--accent),#c45cff);color:#fff;font:800 20px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:18px 42px;border-radius:14px}
+.fab-btn:active{transform:scale(.98)}
+.fab-btn:disabled{opacity:.6;cursor:wait}
+.fab-dir{width:100%;max-width:880px;text-align:left;display:flex;flex-direction:column;gap:12px;background:var(--surface-2);border:1px solid var(--line);border-radius:14px;padding:16px}
+.cal{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+.cal span{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:4px 10px;color:var(--muted)}
+.cal span b{color:var(--fg)}
+.idea{display:grid;grid-template-columns:240px minmax(0,1fr);gap:20px;align-items:start}
+.pv916{position:relative;aspect-ratio:9/16;border-radius:14px;overflow:hidden;background:#111 center/cover no-repeat;box-shadow:0 0 0 1px var(--line)}
+.pv916 .tj{position:absolute;left:8%;right:8%;top:40%;padding:7px 9px;border-radius:7px;font:600 13px/1.15 var(--body);text-align:center;color:#fff;background:#3912B2}
+.pv916 .band{position:absolute;left:0;right:0;top:0;height:21%;display:flex;align-items:flex-end;justify-content:center;padding:0 10% 5%;text-align:center;font:700 13px/1.15 var(--body)}
+.pv916 .lg{position:absolute;left:6%;right:6%;bottom:22%;text-align:center;font:600 12px/1.2 var(--body);color:#fff;text-shadow:0 0 3px #000,0 0 3px #000}
+.pv916 .noimg{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--faint);font-size:12px;padding:20px;text-align:center}
+.idea h2{font-size:24px;margin-bottom:6px}
+.idea .q{font-size:15px;color:var(--fg);border-left:3px solid var(--accent);padding:4px 0 4px 12px;margin:10px 0}
+.idea .why{font-size:13.5px;color:var(--muted)}
+.idea .why b{color:var(--fg)}
+.srcs{display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:12px}
+.srcs a{color:var(--accent-2)}
+.tags{display:flex;gap:6px;flex-wrap:wrap}
+.tag{font-size:11px;font-weight:700;border-radius:999px;padding:3px 9px;background:var(--surface-2);border:1px solid var(--line);color:var(--muted)}
+.tag.star{color:#ffd166;border-color:rgba(255,209,102,.35)}
+.esteira{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(170px,190px);gap:12px;overflow-x:auto;padding-bottom:6px;margin-top:10px}
+.est{background:var(--surface-2);border:1px solid var(--line);border-radius:12px;padding:8px;display:flex;flex-direction:column;gap:6px;cursor:pointer;text-align:left;color:inherit}
+.est:hover{border-color:var(--accent)}
+.est b{font-size:12.5px;line-height:1.25}
+.acv-bar{display:flex;flex-direction:column;gap:10px}
+.acv-bar input[type=search]{width:100%;font-size:14px;padding:11px 14px}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:14px;margin-top:10px}
+.tcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;cursor:pointer;text-align:left;color:inherit;padding:0;display:flex;flex-direction:column}
+.tcard:hover{border-color:var(--accent)}
+.tcard .im{aspect-ratio:16/9;background:#111 center/cover no-repeat;position:relative}
+.tcard .im .badge{position:absolute;left:8px;top:8px;font-size:10px;font-weight:800;background:#ffc21a;color:#111;border-radius:6px;padding:2px 6px;text-transform:uppercase}
+.tcard .im .tm{position:absolute;right:8px;bottom:8px;font:600 11px var(--mono);background:rgba(0,0,0,.7);color:#fff;border-radius:5px;padding:1px 5px}
+.tcard .tx{padding:10px 12px;display:flex;flex-direction:column;gap:3px}
+.tcard .tx b{font-size:13px}
+.tcard .tx span{font-size:12px;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.sec-h{display:flex;align-items:baseline;gap:10px;margin:22px 0 4px}
+.sec-h h2{font-size:17px}
+.tl{position:relative;height:30px;width:100%;background:var(--surface-2);border-radius:8px;cursor:pointer;overflow:hidden}
+.tl .mk{position:absolute;top:5px;bottom:5px;border-radius:4px;background:rgba(123,77,255,.55)}
+.tl .mk.used{background:rgba(184,224,122,.5)}
+.tl .mk.sug{background:rgba(255,194,26,.55);top:20px;bottom:3px}
+.tl .mk.sel{background:rgba(255,77,31,.6)}
+.tl #itTlHead{position:absolute;top:0;bottom:0;width:2px;background:#fff}
+.decup{display:flex;gap:8px;width:100%}
+.decup input{flex:1}
+.drow{display:grid;grid-template-columns:28px 120px minmax(0,1fr) auto;gap:10px;align-items:center;padding:9px 10px;border-radius:10px;background:var(--surface-2)}
+.drow .n{width:24px;height:24px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.drow small{color:var(--muted);display:block}
+.trans p{margin:0 0 6px;font-size:13px;line-height:1.5}
+.trans p span{font:600 11px var(--mono);color:var(--accent-2);cursor:pointer;margin-right:6px}
+.fmtgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.fmtcard{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px}
+.fmtcard ul{margin:0;padding-left:18px;font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:3px}
+.fmtcard .pv916{width:124px;flex:none}
+.fmtcard .pv916 .band{font-size:9.5px;padding:0 6% 5%}
+.fmtcard .pv916 .lg{font-size:9.5px}
+.fmtcard .pv916 .tj{font-size:10px}
+@media (max-width:900px){ .idea{grid-template-columns:1fr} .idea .pv916{max-width:240px} .grid3{grid-template-columns:1fr} .drow{grid-template-columns:28px 1fr auto} .drow .tc{grid-column:2} }
 </style>
 
-<div class="banner">Editor · <span>o bruto é lido direto do seu computador, nada é enviado pra internet (só o texto das falas, quando você gera as legendas do post)</span></div>
+<div class="banner">Estúdio de Conteúdo · <span>os vídeos são lidos direto do seu computador; pra IA vai só texto (falas) e, no acervo, miniaturas das cenas</span></div>
 <div class="app">
   <nav class="side" aria-label="Etapas">
     <div class="brand"><i></i>Estúdio</div>
+    <div class="brandsw" id="brandSw" role="tablist" aria-label="Marca"></div>
+    <p class="navh">Produção</p>
     <button class="nav" data-go="painel" aria-current="page"><b>01</b>Painel</button>
     <button class="nav" data-go="novo"><b>02</b>Novo post</button>
     <button class="nav" data-go="revisao"><b>03</b>Revisão</button>
     <button class="nav" data-go="entrega"><b>04</b>Entrega</button>
-    <hr>
-    <button class="nav" data-go="tom"><b>◎</b>Tom dos programas</button>
+    <p class="navh">Ideias</p>
+    <button class="nav" data-go="fabrica"><b>✦</b>Fábrica de Memes</button>
+    <button class="nav" data-go="potencial"><b>✓</b>Potencial<span class="navn" id="potN"></span></button>
+    <button class="nav" data-go="acervo"><b>▤</b>Acervo</button>
+    <p class="navh">Equipe</p>
+    <button class="nav" data-go="atendimento"><b>☰</b>Atendimento</button>
+    <p class="navh">Marca</p>
+    <button class="nav" data-go="tom"><b>◎</b>Tom e regras</button>
+    <button class="nav" data-go="formatos"><b>▣</b>Formatos e kit</button>
+    <button class="nav" data-go="custos"><b>$</b>Custos de IA</button>
     <button class="nav" data-go="config"><b>⚙</b>Configurações</button>
     <p class="hint">Use no Google Chrome, com a aba aberta durante a análise e o render.</p>
   </nav>
@@ -379,14 +475,14 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
       <div class="card" style="display:flex;flex-direction:column;gap:16px">
         <div><h2>1. Briefing</h2><p class="sub">Preencha os campos. Nos tempos, digite só os números: 005 vira 0:05, 1225 vira 12:25.</p></div>
         <div class="grid2" style="gap:14px">
-          <label class="f">Programa<div class="row" style="flex-wrap:nowrap;gap:8px"><span class="chip static" style="flex:none">GNT</span><select id="progSel"></select></div></label>
+          <label class="f"><span id="progLbl">Programa</span><div class="row" style="flex-wrap:nowrap;gap:8px"><span class="chip static" style="flex:none" id="brandChip">GNT</span><select id="progSel"></select></div></label>
           <label class="f">Episódio<input type="text" id="epIn" inputmode="numeric" placeholder="ex.: 3"></label>
         </div>
         <div class="f" style="display:flex;flex-direction:column;gap:8px;font-size:12px;color:var(--muted);font-weight:500">Trechos (IN e OUT do bruto)
           <div class="list" id="segRows"></div>
           <div><button class="btn sm" id="addSeg" type="button">+ trecho</button></div>
         </div>
-        <label class="f">Tarja<input type="text" id="tarjaIn" placeholder="Só a frase, sem aspas"></label>
+        <label class="f"><span id="tarjaLbl">Tarja</span><input type="text" id="tarjaIn" placeholder="Só a frase, sem aspas"></label>
         <div class="grid2" style="gap:14px">
           <label class="f">Formato<select id="fmtSel"><option>Tarja Sensacionalista</option><option>Tarja de Contexto</option><option value="Vídeo Aspas">Tarja Aspas</option><option>IN/OUT</option></select></label>
           <label class="f" id="corWrap">Cor da tarja sensacionalista<select id="corSel"><option value="roxa">Roxa (texto branco)</option><option value="preta">Preta (texto branco)</option><option value="branca">Branca (texto preto)</option><option value="branca-roxa">Branca com letra roxa</option></select></label>
@@ -506,9 +602,10 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
 
   <!-- TOM -->
   <section class="view wrap" id="v-tom" hidden>
-    <div class="head"><div><div class="eyebrow">Referência</div><h1>Tom dos programas</h1></div><p class="small muted" style="max-width:420px;margin:0">Até 30 legendas reais por programa, tiradas dos ~900 posts mais recentes do @gnt.</p></div>
+    <div class="head"><div><div class="eyebrow" id="tomEyebrow">Referência</div><h1>Tom e regras</h1></div><p class="small muted" style="max-width:420px;margin:0" id="tomSub">Até 30 legendas reais por programa, tiradas dos ~900 posts mais recentes do @gnt.</p></div>
     <div class="progs" id="progs"></div>
     <div class="grid2" id="tomDetail"></div>
+    <div class="card" id="regrasCard" style="margin-top:16px"></div>
   </section>
 
   <!-- CONFIG -->
@@ -516,8 +613,8 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
     <div class="head"><div><div class="eyebrow">Este computador</div><h1>Configurações</h1></div></div>
     <div class="kvs">
       <div class="card">
-        <h2>Legendas do post (Claude)</h2>
-        <p class="sub">Cole a sua chave da API da Anthropic (console.anthropic.com). Ela fica salva só neste navegador.</p>
+        <h2>IA da plataforma (Claude)</h2>
+        <p class="sub">Cole a sua chave da API da Anthropic (console.anthropic.com). Ela fica salva só neste navegador e é usada nas legendas do post, no acervo, na Fábrica e no assistente do atendimento.</p>
         <label class="f" style="margin-top:12px">Chave da API<input type="password" id="apiKey" autocomplete="off" style="background:var(--bg);border:1px solid var(--line);border-radius:var(--r-sm);padding:9px 11px;width:100%"></label>
         <label class="f" style="margin-top:10px">Modelo<input type="text" id="apiModel"></label>
       </div>
@@ -537,6 +634,106 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
       </div>
     </div>
   </section>
+  <!-- FÁBRICA -->
+  <section class="view wrap" id="v-fabrica" hidden>
+    <div class="fab-hero card">
+      <div class="eyebrow" id="fabEyebrow">Linha de produção</div>
+      <h1>Fábrica de Memes</h1>
+      <p class="sub" id="fabSub">O acervo da marca + o que está em alta hoje, já no formato da marca.</p>
+      <button class="fab-btn" id="fabGo"><span>⚡ Gerar meme</span></button>
+      <button class="btn sm" id="fabDirToggle">Direcionar <span class="navn" id="fabDirN"></span></button>
+      <div class="fab-dir" id="fabDir" hidden>
+        <div class="f">Tom<div class="chips" id="fabTom"></div></div>
+        <div class="grid3">
+          <label class="f">Formato<select id="fabFmt"></select></label>
+          <label class="f">Conteúdo do acervo<select id="fabTitulo"></select></label>
+          <label class="f">Ator ou apresentador<input type="text" id="fabPessoa" placeholder="ex.: Angélica"></label>
+          <label class="f">Notícia ou acontecimento<input type="text" id="fabNoticia" placeholder="ex.: final do reality, estreia"></label>
+          <label class="f">Tema<input type="text" id="fabTema" placeholder="ex.: segunda-feira"></label>
+          <label class="f" style="justify-content:flex-end"><span class="row" style="gap:8px"><input type="checkbox" id="fabWeb" checked> buscar o que está em alta na web</span></label>
+        </div>
+        <div class="row"><button class="btn sm ghost" id="fabLimpar">Limpar direcionamento</button></div>
+      </div>
+      <div class="cal" id="fabCal"></div>
+    </div>
+    <p class="status" id="fabStatus"></p>
+    <div id="fabAtual"></div>
+    <div class="card" id="fabEsteiraCard" hidden>
+      <div class="head" style="align-items:center"><h2>Esteira</h2><span class="small muted">as próximas ideias, já prontas</span></div>
+      <div class="esteira" id="fabEsteira"></div>
+    </div>
+  </section>
+
+  <!-- POTENCIAL -->
+  <section class="view wrap" id="v-potencial" hidden>
+    <div class="head"><div><div class="eyebrow" id="potEyebrow">Ideias aprovadas</div><h1>Potencial</h1></div><p class="small muted" style="max-width:420px;margin:0">A equipe só escolhe: cada ideia chega com o porquê, as fontes e o botão de mandar pro editor.</p></div>
+    <div class="list" id="potList"></div>
+  </section>
+
+  <!-- ACERVO -->
+  <section class="view wrap" id="v-acervo" hidden>
+    <div class="head"><div><div class="eyebrow" id="acvEyebrow">Acervo</div><h1>Um acervo que entende o que tem dentro</h1></div>
+      <div class="row"><button class="btn primary" id="acvSubir">↑ Subir no acervo</button></div></div>
+    <div class="card acv-bar">
+      <div class="tabs" id="acvTipo"></div>
+      <div class="tabs" id="acvModo"><button class="chip" data-m="titulos" aria-pressed="true">Títulos</button><button class="chip" data-m="momentos" aria-pressed="false">Momentos</button></div>
+      <input type="search" id="acvBusca" placeholder="Descreva o que aparece na cena: “criança fazendo birra”, “briga”, “beijo”, uma emoção, um objeto...">
+    </div>
+    <div class="card" id="acvIngest" hidden></div>
+    <div id="acvBody"></div>
+  </section>
+
+  <!-- ITEM DO ACERVO -->
+  <section class="view wrap" id="v-item" hidden>
+    <div class="head"><div><div class="eyebrow" id="itEyebrow">Acervo</div><h1 id="itTitulo">Título</h1><p class="small muted" id="itSub"></p></div>
+      <div class="row"><button class="btn" data-go="acervo">← Voltar</button><button class="btn" id="itEditar">Editar dados</button></div></div>
+    <div id="itNeedFile" class="notice warn" hidden></div>
+    <div class="grid-r">
+      <div class="stage">
+        <video id="itVideo" playsinline controls style="width:100%;max-height:60vh;background:#000;border-radius:14px"></video>
+        <div class="tl" id="itTl"><div class="tl-used" id="itTlMarks"></div><i id="itTlHead"></i></div>
+        <div class="ctrl">
+          <button class="btn sm" data-step="-5">−5 s</button><button class="btn sm" data-step="-0.04">‹ 1 frame</button><button class="btn sm" data-step="0.04">1 frame ›</button><button class="btn sm" data-step="5">+5 s</button>
+          <span class="mono small muted" id="itTime">00:00.0</span>
+        </div>
+        <div class="ctrl">
+          <button class="btn sm" id="itIn">⚑ Entrada</button><button class="btn sm" id="itOut">⚑ Saída</button>
+          <input type="text" id="itNome" placeholder="Nome do trecho (ex.: Angélica conta que clonava o WhatsApp)" style="flex:1;min-width:180px">
+          <button class="btn sm primary" id="itMarcar">✓ Marcar trecho</button>
+        </div>
+        <div class="decup"><input type="text" id="itPedido" placeholder="Busque uma cena (alguém chorando, briga) ou peça uma decupagem: “preciso de 10 trechos relevantes desse programa”"><button class="btn sm primary" id="itPedir">Decupar</button></div>
+        <div id="itDecup"></div>
+      </div>
+      <div class="card" style="min-width:0">
+        <div class="tabs" id="itTabs"><button class="chip" data-t="marc" aria-pressed="true">Marcações</button><button class="chip" data-t="mom" aria-pressed="false">Momentos</button><button class="chip" data-t="trans" aria-pressed="false">Transcrição</button></div>
+        <div id="itSide" style="margin-top:12px"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ATENDIMENTO -->
+  <section class="view" id="v-atendimento" hidden>
+    <iframe id="atdFrame" title="Painel de atendimento" style="width:100%;height:calc(100vh - 40px);border:0;display:block;background:var(--bg)"></iframe>
+  </section>
+
+  <!-- FORMATOS -->
+  <section class="view wrap" id="v-formatos" hidden>
+    <div class="head"><div><div class="eyebrow" id="fmtEyebrow">Marca</div><h1>Formatos e kit</h1></div><p class="small muted" style="max-width:420px;margin:0">Cada marca vê os próprios formatos. Escolheu no Novo post, o Estúdio aplica as regras sozinho.</p></div>
+    <div class="fmtgrid" id="fmtList"></div>
+    <div class="card" id="kitMarca" style="margin-top:16px"></div>
+  </section>
+
+  <!-- CUSTOS -->
+  <section class="view wrap" id="v-custos" hidden>
+    <div class="head"><div><div class="eyebrow">Gestão</div><h1>Custos de IA</h1></div><p class="small muted" style="max-width:420px;margin:0">Gasto da API por marca e por recurso, contado a partir das respostas da própria API. Os preços ficam editáveis.</p></div>
+    <div class="stats" id="custoStats"></div>
+    <div class="grid2">
+      <div class="card"><h2>Por recurso</h2><div id="custoRec" style="margin-top:10px"></div></div>
+      <div class="card"><h2>Preço e limite</h2><div id="custoCfg" style="margin-top:10px"></div></div>
+    </div>
+    <div class="card"><h2>Últimos usos</h2><div class="tablewrap" style="margin-top:10px"><table><thead><tr><th>Quando</th><th>Marca</th><th>Recurso</th><th>Entrada</th><th>Saída</th><th>Buscas</th><th>US$</th></tr></thead><tbody id="custoLog"></tbody></table></div></div>
+  </section>
+
   </main>
 </div>
 <div class="toast" id="toast" role="status"></div>
@@ -852,6 +1049,34 @@ const STATUSES = ["Em produção","Em revisão","Ajustes pedidos","Em aprovaçã
 const FMTS = {"9x16":[1080,1920], "4x5":[1080,1350], "1x1":[1080,1080]};
 const LIMITS = {aspa:{max:59,label:"Aspa: até 59 s"}, trecho:{max:150,label:"Trecho: até 2min30"}, longo:{min:360,max:600,label:"Trecho longo: 6 a 10 min"}};
 
+/* ---------- marcas ---------- */
+const MARCAS = {
+  gnt:{nome:"GNT", cor:"#3912B2", cor2:"#CA7CD8",
+    formatos:["Tarja Sensacionalista","Tarja de Contexto","Vídeo Aspas","IN/OUT"],
+    regra:{caixa:"frase", ponto:true, cor:"#ffffff", label:"Maiúscula e ponto"}},
+  globoplay:{nome:"Globoplay", cor:"#FB4B1E", cor2:"#FF2E7E",
+    formatos:["Tarja de Contexto","IN/OUT"],
+    regra:{caixa:"minuscula", ponto:false, cor:"#ffffff", label:"Tudo minúsculo, sem ponto"}},
+  telecine:{nome:"Telecine", cor:"#1A1A8C", cor2:"#FFE500",
+    formatos:["Tarja de Contexto","Tela dividida","IN/OUT"],
+    regra:{caixa:"frase", ponto:false, cor:"#FFE500", label:"Maiúscula no começo, amarela"}}
+};
+let MARCA = (()=>{ try{ const m=localStorage.getItem("marca"); return MARCAS[m]?m:"gnt"; }catch(e){ return "gnt"; } })();
+const marcaDe = j => (j && MARCAS[j.marca]) ? j.marca : "gnt";
+const formatosDe = m => (MARCAS[m]||MARCAS.gnt).formatos;
+const fmtNome = f => f==="Vídeo Aspas" ? "Tarja Aspas" : f;
+function regraDe(m){ const base=(MARCAS[m]||MARCAS.gnt).regra; const o=(typeof settings==="object"&&settings.regras&&settings.regras[m])||{}; return Object.assign({}, base, o); }
+/* aplica a regra de legenda da marca (guia de cada conta) */
+function legendaMarca(j, text){
+  let t=String(text||"").trim(); if(!t) return t; const r=regraDe(marcaDe(j));
+  if(r.caixa==="minuscula") t=t.toLocaleLowerCase("pt-BR");
+  else if(r.caixa==="maiuscula") t=t.toLocaleUpperCase("pt-BR");
+  else t=t.charAt(0).toLocaleUpperCase("pt-BR")+t.slice(1);
+  if(r.ponto){ if(!/[.!?…"”]$/.test(t)) t=t.replace(/[,;:]$/,"")+"."; }
+  else if(r.caixa==="minuscula"){ t=t.replace(/[.,;:!]+(?=\s|$)/g,""); }
+  else t=t.replace(/[.,;:]$/,"");
+  return t;
+}
 function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("on"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("on"), 2600); }
 function notice(msg, kind){ const n=$("#topNotice"); n.textContent=msg||""; n.className="notice "+(kind||""); n.hidden=!msg; }
 function copyText(txt){ try{ navigator.clipboard.writeText(txt).then(()=>toast("Copiado"), ()=>toast("Não deu pra copiar")); }catch(e){ toast("Não deu pra copiar"); } }
@@ -863,7 +1088,7 @@ const newId = () => "j"+Date.now().toString(36)+Math.random().toString(36).slice
 
 /* ---------- IndexedDB ---------- */
 const idb = (()=>{ let dbp;
-  function open(){ return dbp ||= new Promise((res,rej)=>{ const r=indexedDB.open("estudio-editor",1); r.onupgradeneeded=()=>{ const d=r.result; d.createObjectStore("jobs"); d.createObjectStore("handles"); d.createObjectStore("kv"); }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
+  function open(){ return dbp ||= new Promise((res,rej)=>{ const r=indexedDB.open("estudio-editor",2); r.onupgradeneeded=()=>{ const d=r.result; ["jobs","handles","kv","acervo","titulos","thumbs","ideias"].forEach(n=>{ if(!d.objectStoreNames.contains(n)) d.createObjectStore(n); }); }; r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); }); }
   async function tx(store, mode, fn){ const d=await open(); return new Promise((res,rej)=>{ const t=d.transaction(store, mode); const s=t.objectStore(store); const out=fn(s); t.oncomplete=()=>res(out instanceof IDBRequest?out.result:out); t.onerror=()=>rej(t.error); }); }
   return {
     get:(st,k)=>tx(st,"readonly",s=>s.get(k)),
@@ -891,11 +1116,22 @@ function ensureAudio(){
   monitor = actx.createGain(); monitor.gain.value = 1; srcNode.connect(monitor); monitor.connect(actx.destination);
   mdest = actx.createMediaStreamDestination(); srcNode.connect(mdest);
 }
+const video2 = document.createElement("video");   // tela dividida: o trecho de baixo
+video2.playsInline = true; video2.preload = "auto"; video2.muted = true;
+function segBOf(j){ return j && j.fmt==="Tela dividida" && j.segB && j.segB.out>j.segB.in ? j.segB : null; }
+function prepVideo2(){ if(cur && segBOf(cur) && video.src && video2.src!==video.src){ video2.src=video.src; } }
+function v2Target(j, tSrc){ const sb=segBOf(j), sa=segsOf(j)[0]; if(!sb||!sa) return null; return Math.min(sb.out, sb.in + Math.max(0, tSrc - sa.in)); }
+function syncV2(j, tSrc, playing){
+  const tg=v2Target(j, tSrc); if(tg==null) return;
+  if(!video2.src) prepVideo2();
+  if(playing){ if(video2.paused) video2.play().catch(()=>{}); if(Math.abs(video2.currentTime-tg)>0.25) video2.currentTime=tg; }
+  else { if(!video2.paused) video2.pause(); if(Math.abs(video2.currentTime-tg)>0.04){ video2.currentTime=tg; video2.onseeked=()=>{ video2.onseeked=null; if(!previewPlaying&&!rendering) draw(); }; } }
+}
 let loadedFor = null;
 async function loadVideo(file, jobId){
   if(loadedFor===jobId && video.src) return;
   if(video.src) URL.revokeObjectURL(video.src);
-  video.src = URL.createObjectURL(file); loadedFor = jobId;
+  video.src = URL.createObjectURL(file); loadedFor = jobId; video2.removeAttribute("src");
   const fail="O Chrome não conseguiu abrir esse arquivo de vídeo. Exporte o bruto em MP4 (H.264) e tente de novo.";
   await new Promise((res,rej)=>{ const to=setTimeout(()=>{ loadedFor=null; rej(new Error(fail)); }, 20000); video.onloadedmetadata=()=>{ clearTimeout(to); res(); }; video.onerror=()=>{ clearTimeout(to); loadedFor=null; rej(new Error(fail)); }; });
   if(video.readyState<2) await new Promise((res,rej)=>{ const to=setTimeout(()=>{ loadedFor=null; rej(new Error(fail)); }, 20000); video.onloadeddata=()=>{ clearTimeout(to); res(); }; });
@@ -1114,7 +1350,7 @@ function cuesOut(j){
   }
   return res;
 }
-function srtText(j){ return cuesOut(j).map((c,i)=>`${i+1}\n${srtTime(c.s)} --> ${srtTime(c.e)}\n${balance2(c.text).join("\n")}\n`).join("\n"); }
+function srtText(j){ return cuesOut(j).map((c,i)=>`${i+1}\n${srtTime(c.s)} --> ${srtTime(c.e)}\n${balance2(legendaMarca(j,c.text)).join("\n")}\n`).join("\n"); }
 
 /* ---------- reenquadramento ---------- */
 function kfAt(j, t){ const k=(j.kfs||[]).filter(k=>k.t<=t+1e-3).sort((a,b)=>b.t-a.t)[0]; return k || (j.kfs||[])[0] || {t:0,cx:0.5,cy:0.4}; }
@@ -1125,11 +1361,12 @@ function centerAt(j, t){
   if(j.smooth && i>0){ const p=kfs[i-1], f=clamp((t-k.t)/0.6,0,1), e=f<.5?2*f*f:1-Math.pow(-2*f+2,2)/2; return {cx:p.cx+(k.cx-p.cx)*e, cy:p.cy+(k.cy-p.cy)*e}; }
   return {cx:k.cx, cy:k.cy};
 }
-function bandFrac(j, fmt){ return (j.fmt==="Tarja Sensacionalista" && (j.tarja||"").trim()) ? (fmt==="9x16"?0.213:fmt==="4x5"?0.18:0.19) : 0; }
-function cropRect(j, fmt, t){
-  const [W,H0]=FMTS[fmt], top=bandFrac(j,fmt), H=H0*(1-top), sw=video.videoWidth||1920, sh=video.videoHeight||1080, ta=W/H;
+function faixaTopo(j){ const m=marcaDe(j); return j.fmt==="Tarja Sensacionalista" || (m!=="gnt" && j.fmt==="Tarja de Contexto"); }
+function bandFrac(j, fmt){ return (faixaTopo(j) && (j.tarja||"").trim()) ? (fmt==="9x16"?0.213:fmt==="4x5"?0.18:0.19) : 0; }
+function cropRect(j, fmt, t, half){
+  const [W,H0]=FMTS[fmt], split=j.fmt==="Tela dividida", top=split?0:bandFrac(j,fmt), H=split?H0/2:H0*(1-top), sw=video.videoWidth||1920, sh=video.videoHeight||1080, ta=W/H;
   let cw, ch; if(sw/sh>ta){ ch=sh; cw=ch*ta; } else { cw=sw; ch=cw/ta; }
-  const {cx,cy}=centerAt(j,t);
+  const {cx,cy}=half==="b" ? {cx:j.segBcx!=null?j.segBcx:0.5, cy:0.4} : centerAt(j,t);
   const x=clamp(cx*sw-cw/2, 0, sw-cw), y=clamp(cy*sh-ch*0.42, 0, sh-ch);
   return {x,y,cw,ch,sw,sh,top};
 }
@@ -1138,8 +1375,10 @@ function cropRect(j, fmt, t){
 /* padrão GNT (templates da pasta ENTREGA 3): roxo 3912B2, PP Mori SemiBold, legenda branca com contorno 3, bug embaixo no centro */
 const GNT = {roxo:"#3912B2", lilas:"#CA7CD8", laranja:"#CC820D", lima:"#D5E9AA", vermelho:"#EA0F2F"};
 const FORMATOS = ["Tarja Sensacionalista","Tarja de Contexto","Vídeo Aspas","IN/OUT"];
-let logoImg=null; const bugImgs={}; let fontsReady=false;
+let logoImg=null; const bugImgs={}; let fontsReady=false; const marcaLogos={};
 const FONT = () => fontsReady ? '"PP Mori", "DM Sans", sans-serif' : '"DM Sans", sans-serif';
+const marcaFonts = {};   // marca -> true quando a fonte do kit da marca carregou
+const FONTB = m => (m==="gnt"||!m) ? FONT() : (marcaFonts[m] ? `"Marca ${m}", "DM Sans", sans-serif` : '"DM Sans", sans-serif');
 function wrapPx(ctx, text, maxW){ const words=text.split(/\s+/); const lines=[]; let l=""; for(const w of words){ const c=l?l+" "+w:w; if(ctx.measureText(c).width>maxW && l){ lines.push(l); l=w; } else l=c; } if(l) lines.push(l); return lines; }
 function roundRect(ctx,x,y,w,h,r){ ctx.beginPath(); ctx.moveTo(x+r,y); ctx.arcTo(x+w,y,x+w,y+h,r); ctx.arcTo(x+w,y+h,x,y+h,r); ctx.arcTo(x,y+h,x,y,r); ctx.arcTo(x,y,x+w,y,r); ctx.closePath(); }
 function cleanTarja(t){ return String(t||"").trim().replace(/^["“]|["”]$/g,""); }
@@ -1196,6 +1435,8 @@ function bugRect(W, H, fmt, j){
   const bw=W*0.141, bh=bw*ref.h/ref.w; return {t:ref, x:W-W*0.075-bw, y:fmt==="9x16"?H*0.153-bh/2:W*0.06, w:bw, h:bh};
 }
 function drawBug(ctx, W, H, fmt, j, oT){
+  const mk=marcaDe(j);
+  if(mk!=="gnt"){ const im=marcaLogos[mk]; if(!im) return; const bw=W*0.16, bh=bw*im.height/im.width; const y = (j.fmt==="Tarja de Contexto"&&(j.tarja||"").trim()) ? H*bandFrac(j,fmt)+W*0.04 : W*0.06; ctx.drawImage(im, W-W*0.06-bw, y, bw, bh); return; }
   const P=bugRect(W,H,fmt,j); if(!P) return;
   if(bugAnim && oT!=null){ const m=bugAnim.meta, fi=Math.floor(oT*m.fps);
     if(fi < m.frames){ const Fw=m.F[2]-m.F[0], k=P.w/Fw; const ux=P.x-(m.F[0]-m.U[0])*k, uy=P.y-(m.F[1]-m.U[1])*k;
@@ -1203,10 +1444,11 @@ function drawBug(ctx, W, H, fmt, j, oT){
   if(P.t && P.t.img) ctx.drawImage(P.t.img, P.x, P.y, P.w, P.h);
 }
 function drawSubtitle(ctx, W, H, fmt, j, c, yFrac){
-  const fs=Math.round(W*0.045); ctx.font=`600 ${fs}px ${FONT()}`; ctx.textAlign="center"; ctx.textBaseline="top";
-  const lines=c.text.length>28 ? blockLines(ctx, c.text, W*0.8, 2) : [c.text], lh=fs*1.18;
+  const m=marcaDe(j), txt=legendaMarca(j, c.text), rg=regraDe(m);
+  const fs=Math.round(W*0.045); ctx.font=`600 ${fs}px ${FONTB(m)}`; ctx.textAlign="center"; ctx.textBaseline="top";
+  const lines=txt.length>28 ? blockLines(ctx, txt, W*0.8, 2) : [txt], lh=fs*1.18;
   const y0=H*yFrac - (lines.length*lh)/2;
-  ctx.lineJoin="round"; ctx.miterLimit=2; ctx.lineWidth=Math.max(2, W/1080*6); ctx.strokeStyle="rgba(0,0,0,.85)"; ctx.fillStyle="#fff";
+  ctx.lineJoin="round"; ctx.miterLimit=2; ctx.lineWidth=Math.max(2, W/1080*6); ctx.strokeStyle="rgba(0,0,0,.85)"; ctx.fillStyle=rg.cor||"#fff";
   lines.forEach((l,i)=>{ ctx.strokeText(l, W/2, y0+i*lh); ctx.fillText(l, W/2, y0+i*lh); });
 }
 /* rosto do talento no quadro de saída, pra tarja nunca cobrir */
@@ -1228,9 +1470,11 @@ function tarjaTop(j, fmt, W, H, bw, bh, defaultTop){
 }
 function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   const r=cropRect(j, fmt, tSrc);
+  const marca=marcaDe(j), split=j.fmt==="Tela dividida";
   ctx.save(); ctx.fillStyle="#000"; ctx.fillRect(0,0,W,H);
-  const vy=r.top*H, vh=H-vy;
+  const vy=r.top*H, vh=split?H/2:H-vy;
   ctx.drawImage(video, r.x, r.y, r.cw, r.ch, 0, vy, W, vh);
+  if(split){ const rb=cropRect(j, fmt, tSrc, "b"); if(video2.readyState>=2) ctx.drawImage(video2, rb.x, rb.y, rb.cw, rb.ch, 0, H/2, W, H/2); else { ctx.fillStyle="#111"; ctx.fillRect(0,H/2,W,H/2); } ctx.fillStyle="#000"; ctx.fillRect(0,H/2-Math.max(2,W*0.004),W,Math.max(4,W*0.008)); }
   const sy=vh/r.ch;
   if(j.mask && j.mask.on){
     const my=(j.mask.y/100)*r.sh, mh=(j.mask.h/100)*r.sh;
@@ -1239,11 +1483,26 @@ function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   }
   if(o.clean){ ctx.restore(); return; }
   const oT = o.outT!=null ? o.outT : (srcToOut(j,tSrc)||0);
-  const tarja = caixaBaixa(j.tarja);
+  const tarja = marca==="telecine" ? cleanTarja(j.tarja).toLocaleUpperCase("pt-BR") : caixaBaixa(j.tarja);
   const c = cueAt(j,tSrc);
+  if(marca!=="gnt" && j.fmt==="Tarja de Contexto" && tarja){
+    const bandH=H*bandFrac(j,fmt), gp=marca==="globoplay";
+    ctx.fillStyle = gp ? "#ECECEE" : "#0D0F63"; ctx.fillRect(0,0,W,bandH);
+    const fs=Math.round(W*(gp?0.05:0.052)); ctx.font=`${gp?600:800} ${fs}px ${FONTB(marca)}`; ctx.fillStyle= gp ? "#111114" : "#ffffff"; ctx.textAlign="center"; ctx.textBaseline="alphabetic";
+    const lines=blockLines(ctx, tarja, W*0.84, null).slice(0,3), lh=fs*1.15;
+    const lastBase = bandH - fs*0.7;
+    lines.forEach((l,i)=>ctx.fillText(l, W/2, lastBase-(lines.length-1-i)*lh));
+  }
+  if(split){
+    const [t1,t2]=String(j.tarja||"").split("|").map(x=>x.trim());
+    const fs=Math.round(W*0.055); ctx.font=`800 ${fs}px ${FONTB(marca)}`; ctx.textAlign="center"; ctx.textBaseline="alphabetic"; ctx.lineJoin="round"; ctx.lineWidth=Math.max(3,W/1080*9); ctx.strokeStyle="#000"; ctx.fillStyle=regraDe(marca).cor;
+    const put=(txt, yBase)=>{ if(!txt) return; const ls=blockLines(ctx, txt, W*0.86).slice(0,2); ls.forEach((l,i)=>{ const y=yBase-(ls.length-1-i)*fs*1.12; ctx.strokeText(l,W/2,y); ctx.fillText(l,W/2,y); }); };
+    put(t1, H/2-H*0.03); put(t2, H-H*0.06);
+    drawBug(ctx, W, H, fmt, j, oT); ctx.restore(); return;
+  }
   let subY = fmt==="9x16"?0.72:fmt==="4x5"?0.8:0.8;
 
-  if(j.fmt==="Tarja Sensacionalista" && tarja){
+  if(marca==="gnt" && j.fmt==="Tarja Sensacionalista" && tarja){
     const [bg,fg] = SENS_CORES[j.tarjaCor] || SENS_CORES.roxa;
     const bandH = H*bandFrac(j,fmt);
     ctx.fillStyle=bg; ctx.fillRect(0,0,W,bandH);
@@ -1254,7 +1513,7 @@ function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   }
   // Contexto e Aspas: fixas na abertura, 4 s de leitura, só movimento de saída (texto some, caixa sobe e sai)
   const HOLD=4.0, OUT=0.6, outP=clamp((oT-HOLD)/OUT,0,1);
-  if((j.fmt==="Tarja de Contexto"||j.fmt==="Vídeo Aspas") && tarja && oT<HOLD+OUT){
+  if(marca==="gnt" && (j.fmt==="Tarja de Contexto"||j.fmt==="Vídeo Aspas") && tarja && oT<HOLD+OUT){
     const aspas=j.fmt==="Vídeo Aspas";
     const fs=Math.round(W*0.0463); ctx.font=`600 ${fs}px ${FONT()}`; ctx.textBaseline="alphabetic"; ctx.textAlign="center";
     const lines=blockLines(ctx, tarja, W*0.62), lh=fs*1.1, padX=W*0.021, padY=W*0.0185;
@@ -1270,6 +1529,7 @@ function drawFrame(ctx, W, H, fmt, j, tSrc, o={}){
   }
   if(c && c.text.trim()){
     if(j.fmt==="IN/OUT"||j.fmt==="Produtizado") subY = fmt==="9x16"?0.62:0.68;
+    if(marca!=="gnt" && j.fmt==="Tarja de Contexto") subY = fmt==="9x16"?0.74:0.82;
     drawSubtitle(ctx, W, H, fmt, j, c, subY);
   }
   drawBug(ctx, W, H, fmt, j, oT);
@@ -1371,6 +1631,7 @@ async function analyze(j){
       }
     }
     j.cues=cues.sort((a,b)=>a.s-b.s);
+    if(typeof aplicarGlossario==="function") j.cues.forEach(c=>{ c.text=aplicarGlossario(c.text, chaveRef(j), marcaDe(j)); c.o=c.text; });
     step("asr","ok",`${j.cues.length} legendas · ${/large/.test(asrUsed||"")?"modelo máximo":"modelo rápido"}`, lap());
   } else { j.cues=j.cues||[]; step("asr","err","Sem transcrição automática: importe ou cole o SRT na revisão", lap()); }
 
@@ -1489,6 +1750,7 @@ function go(v){
   if(v!==view && previewPlaying) stopPreview();
   view=v; $$(".view").forEach(x=>x.hidden = x.id!=="v-"+v); $$(".nav").forEach(n=>n.setAttribute("aria-current", n.dataset.go===v?"page":"false"));
   if(v==="painel") renderPainel(); if(v==="revisao") openRevisao(); if(v==="entrega") renderEntrega(); if(v==="tom") renderTom(); if(v==="config") renderConfig();
+  if(v==="novo") renderNovo(); if(typeof PLAT==="object" && PLAT[v]) PLAT[v]();
   window.scrollTo(0,0);
 }
 document.addEventListener("click", e=>{ const g=e.target.closest("[data-go]"); if(g){ e.preventDefault(); go(g.dataset.go); } });
@@ -1496,23 +1758,23 @@ document.addEventListener("click", e=>{ const g=e.target.closest("[data-go]"); i
 /* ---------- painel ---------- */
 let fProg="";
 function renderPainel(){
-  const list=JOBS.slice().sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
+  const list=JOBS.filter(j=>marcaDe(j)===MARCA).sort((a,b)=>(b.updatedAt||"").localeCompare(a.updatedAt||""));
   $("#stats").innerHTML=STATUSES.map(s=>`<div class="stat"><b>${list.filter(j=>j.status===s).length}</b><span>${s}</span></div>`).join("");
   const progs=[...new Set(list.map(j=>j.prog).filter(p=>p&&PROGRAMAS[p]))];
   $("#fProg").innerHTML=`<option value="">Todos os programas</option>`+progs.map(p=>`<option value="${p}" ${p===fProg?"selected":""}>${PROGRAMAS[p].nome}</option>`).join("");
   const rows=list.filter(j=>!fProg||j.prog===fProg); const t=todayISO();
   const stage={novo:"Aguardando processar", processado:"Pronto pra revisar", renderizado:"Vídeos prontos"};
   $("#jobs").innerHTML = rows.length ? rows.map(j=>`<tr>
-    <td class="job"><b><button class="linkbtn" style="color:var(--fg);font-size:13px;font-weight:700;text-align:left" data-open="${j.id}">${esc(j.titulo)}</button></b><span>${esc(j.fmt)}${j.prog&&PROGRAMAS[j.prog]?" · "+esc(PROGRAMAS[j.prog].nome):""}</span></td>
+    <td class="job"><b><button class="linkbtn" style="color:var(--fg);font-size:13px;font-weight:700;text-align:left" data-open="${j.id}">${esc(j.titulo)}</button></b><span>${esc(fmtNome(j.fmt))}${j.prog&&PROGRAMAS[j.prog]?" · "+esc(PROGRAMAS[j.prog].nome):""}</span></td>
     <td class="mono small">${esc((j.outs||[]).join(" · "))}</td>
     <td>${j.prazo && j.prazo<t && j.status!=="Aprovado" ? `<span class="late">${j.prazo.slice(8,10)}/${j.prazo.slice(5,7)} · atrasado</span>` : j.prazo===t?"Hoje":(j.prazo?j.prazo.slice(8,10)+"/"+j.prazo.slice(5,7):"·")}</td>
     <td><select data-stat="${j.id}" aria-label="Status">${STATUSES.map(s=>`<option ${s===j.status?"selected":""}>${s}</option>`).join("")}</select></td>
     <td class="small muted">${stage[j.stage]||""}</td>
     <td><button class="linkbtn" data-del="${j.id}">Apagar</button></td></tr>`).join("")
-    : `<tr><td colspan="6" class="muted">Nenhum job ainda. Crie o primeiro em Novo post.</td></tr>`;
+    : `<tr><td colspan="6" class="muted">Nenhum job de ${MARCAS[MARCA].nome} ainda. Crie o primeiro em Novo post, pelo acervo ou pela Fábrica.</td></tr>`;
 }
 $("#fProg").addEventListener("change", e=>{ fProg=e.target.value; renderPainel(); });
-$("#jobs").addEventListener("change", e=>{ const s=e.target.closest("[data-stat]"); if(!s) return; const j=JOBS.find(x=>x.id===s.dataset.stat); j.status=s.value; j.updatedAt=new Date().toISOString(); saveJob(j); toast("Status atualizado"); });
+$("#jobs").addEventListener("change", e=>{ const s=e.target.closest("[data-stat]"); if(!s) return; const j=JOBS.find(x=>x.id===s.dataset.stat); j.status=s.value; j.updatedAt=new Date().toISOString(); saveJob(j); toast("Status atualizado"); if(typeof aoMudarStatus==="function") aoMudarStatus(j); });
 let delArm=null;
 $("#jobs").addEventListener("click", async e=>{
   const o=e.target.closest("[data-open]"); if(o){ cur=JOBS.find(j=>j.id===o.dataset.open); go(cur.stage==="novo"?"novo":"revisao"); return; }
@@ -1523,6 +1785,22 @@ $("#jobs").addEventListener("click", async e=>{
 });
 
 /* ---------- novo post ---------- */
+function renderNovo(){
+  const m=MARCA, M=MARCAS[m]; $("#brandChip").textContent=M.nome; $("#novoEyebrow").textContent="Novo post · "+M.nome;
+  const keep=$("#progSel").value;
+  if(m==="gnt"){ $("#progLbl").textContent="Programa"; $("#progSel").innerHTML=ORDER.map(k=>`<option value="${k}">${PROGRAMAS[k].nome}</option>`).join("")+`<option value="">Outro / sem programa</option>`; }
+  else { $("#progLbl").textContent="Título"; const ts=(typeof TITULOS==="object"?TITULOS:[]).filter(t=>t.marca===m).sort((a,b)=>a.nome.localeCompare(b.nome)); $("#progSel").innerHTML=ts.map(t=>`<option value="t:${t.id}">${esc(t.nome)}</option>`).join("")+`<option value="">Outro / sem título</option>`; }
+  if([...$("#progSel").options].some(o=>o.value===keep)) $("#progSel").value=keep;
+  const fk=$("#fmtSel").value; $("#fmtSel").innerHTML=formatosDe(m).map(f=>`<option value="${f}">${fmtNome(f)}</option>`).join(""); if(formatosDe(m).includes(fk)) $("#fmtSel").value=fk;
+  fmtSelChanged(); autoTitle();
+}
+function fmtSelChanged(){ const f=$("#fmtSel").value, m=MARCA; $("#corWrap").hidden = !(m==="gnt" && f==="Tarja Sensacionalista");
+  $("#tarjaLbl").textContent = f==="Tela dividida" ? "Textos da tela dividida (de cima | de baixo)" : "Tarja";
+  $("#tarjaIn").placeholder = f==="Tela dividida" ? "Eu no domingo | Eu na segunda" : "Só a frase, sem aspas";
+  if(f==="Tela dividida" && $$("#segRows [data-row]").length<2){ const d=rowsData(); while(d.length<2) d.push({a:"",b:""}); renderRows(d); }
+  $$("#segRows [data-row] b").forEach((b,i)=>{ b.textContent = f==="Tela dividida" ? (i===0?"De cima":i===1?"De baixo":"Trecho "+(i+1)) : "Trecho "+(i+1); });
+}
+function progNome(j){ if(!j||!j.prog) return ""; if(PROGRAMAS[j.prog]) return PROGRAMAS[j.prog].nome; if(String(j.prog).startsWith("t:") && typeof TITULOS==="object"){ const t=TITULOS.find(x=>"t:"+x.id===j.prog); if(t) return t.nome; } return j.progNome||""; }
 $("#progSel").innerHTML=ORDER.map(k=>`<option value="${k}">${PROGRAMAS[k].nome}</option>`).join("")+`<option value="">Outro / sem programa</option>`;
 $("#prazoIn").value=todayISO();
 let draft={file:null, handle:null}, titleTouched=false;
@@ -1553,7 +1831,7 @@ function refreshDraft(){
   });
   checkDur(); autoTitle();
 }
-function autoTitle(){ if(titleTouched) return; const p=$("#progSel").value, ep=$("#epIn").value.trim(), n=$$("#segRows [data-row]").length; $("#tituloIn").value=[p?PROGRAMAS[p].nome:"Job", ep?"Ep"+ep:null, n===1?"Trecho 01":null].filter(Boolean).join(" · "); }
+function autoTitle(){ if(titleTouched) return; const pv=$("#progSel").value, p=PROGRAMAS[pv]?pv:"", pn=p?PROGRAMAS[p].nome:($("#progSel").selectedOptions[0]&&pv?$("#progSel").selectedOptions[0].textContent:""), ep=$("#epIn").value.trim(), n=$$("#segRows [data-row]").length; $("#tituloIn").value=[pn||"Job", ep?"Ep"+ep:null, n===1?"Trecho 01":null].filter(Boolean).join(" · "); }
 $("#segRows").addEventListener("input", refreshDraft);
 $("#segRows").addEventListener("focusout", e=>{ const inp=e.target.closest(".tin"); if(!inp||!inp.value) return; const t=digitsToT(inp.value); if(!isNaN(t)) inp.value=showT(t); refreshDraft(); });
 $("#segRows").addEventListener("click", e=>{ const b=e.target.closest("[data-rm]"); if(!b) return; const d=rowsData(); d.splice(+b.dataset.rm,1); renderRows(d); });
@@ -1565,7 +1843,8 @@ function readBriefing(){
   const t=$("#briefing").value, low=t.toLowerCase();
   if(!t.trim()){ $("#briefMsg").textContent="Cole o texto primeiro."; return; }
   const found=ORDER.find(k=>low.includes(PROGRAMAS[k].nome.toLowerCase().replace(/[?,]/g,""))||(k==="qheep"&&/porchat/.test(low)));
-  if(found) $("#progSel").value=found;
+  if(MARCA==="gnt"){ if(found) $("#progSel").value=found; }
+  else { const tt=acharTituloNoTexto(t); if(tt) $("#progSel").value="t:"+tt.id; }
   const TM="(\\d{1,2}(?:[:;.]\\d{2}){1,2}(?:[.,]\\d+)?)";
   const re=new RegExp("\\bin\\b\\s*[:;\\-]?\\s*"+TM+"[\\s\\S]*?\\bout\\b\\s*[:;\\-]?\\s*"+TM, "gi"); let m; const rows=[];
   while((m=re.exec(t))){ const a=parseT(m[1].replace(/[.,](\d+)$/,".$1")), b=parseT(m[2].replace(/[.,](\d+)$/,".$1")); if(b>a) rows.push({a:showT(a), b:showT(b)}); }
@@ -1573,7 +1852,7 @@ function readBriefing(){
   const tj=t.match(/tarja:\s*["“]?([^"”\n]+)["”]?/i); if(tj) $("#tarjaIn").value=tj[1].trim();
   const ep=t.match(/\bep\.?\s*(\d+)/i); if(ep) $("#epIn").value=ep[1];
   if(/aspas?/i.test(t)) $("#tipoSel").value="aspa";
-  const fm=/sensacionalista/i.test(t)?"Tarja Sensacionalista":/contexto/i.test(t)?"Tarja de Contexto":/produtizad/i.test(t)?"IN/OUT":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null; if(fm) $("#fmtSel").value=fm;
+  const fm=/sensacionalista/i.test(t)?"Tarja Sensacionalista":/contexto/i.test(t)?"Tarja de Contexto":/tela dividida|split/i.test(t)?"Tela dividida":/produtizad/i.test(t)?"IN/OUT":/in\/out/i.test(t)?"IN/OUT":/aspas/i.test(t)?"Vídeo Aspas":null; if(fm && formatosDe(MARCA).includes(fm)){ $("#fmtSel").value=fm; fmtSelChanged(); }
   const outs=[...new Set((t.match(/\b(9x16|4x5|1x1)\b/gi)||[]).map(s=>s.toLowerCase()))];
   if(outs.length){ const key=["9x16","4x5","1x1"].filter(o=>outs.includes(o)).join(","); if([...$("#dimSel").options].some(o=>o.value===key)) $("#dimSel").value=key; }
   titleTouched=false; autoTitle();
@@ -1586,7 +1865,7 @@ function checkDur(){
   box.className="check "+(ok?"ok":"bad"); box.innerHTML=`<div><strong>${ok?"Duração dentro do padrão":"Duração fora do padrão"} · ${total<60?Math.round(total)+" s":Math.floor(total/60)+"min"+String(Math.round(total%60)).padStart(2,"0")}</strong>${L.label}${ok?"":". Revise o IN/OUT ou mude o tipo de corte."}</div>`;
 }
 $("#readBrief").addEventListener("click", readBriefing);
-$("#fmtSel").addEventListener("change", ()=>{ $("#corWrap").hidden = $("#fmtSel").value!=="Tarja Sensacionalista"; });
+$("#fmtSel").addEventListener("change", fmtSelChanged);
 $("#tipoSel").addEventListener("change", checkDur);
 $("#pickBruto").addEventListener("click", async ()=>{ const r=await pickFile(); if(!r) return; draft.file=r.file; draft.handle=r.handle; $("#brutoName").textContent=r.file.name+" · "+(r.file.size/1e9>=1?(r.file.size/1e9).toFixed(2)+" GB":Math.round(r.file.size/1e6)+" MB"); $("#dropBruto").classList.add("has"); });
 const dz=$("#dropBruto"); dz.addEventListener("dragover", e=>{ e.preventDefault(); }); dz.addEventListener("drop", async e=>{ e.preventDefault(); const it=e.dataTransfer.items&&e.dataTransfer.items[0]; let h=null; try{ if(it&&it.getAsFileSystemHandle) h=await it.getAsFileSystemHandle(); }catch(err){} const f=e.dataTransfer.files[0]; if(!f) return; draft.file=f; draft.handle=h&&h.kind==="file"?h:null; $("#brutoName").textContent=f.name; dz.classList.add("has"); });
@@ -1597,14 +1876,17 @@ $("#createJob").addEventListener("click", async ()=>{
   if(!draft.file) return toast("Escolha o bruto");
   const outs=$("#dimSel").value.split(",");
   ensureAudio();
-  const j={ id:newId(), titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, ep:$("#epIn").value.trim(), tipo:$("#tipoSel").value, fmt:$("#fmtSel").value, tarjaCor:$("#corSel").value, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim().replace(/^["“]|["”]$/g,""), briefing:$("#briefing").value,
-    segs, cues:[], kfs:[], samples:[], thumbs:[], mask:{on:false,y:82,h:12}, smooth:false, status:"Em produção", stage:"novo", fileName:draft.file.name, post:null, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
+  const isSplit=$("#fmtSel").value==="Tela dividida";
+  if(isSplit && segs.length<2) return toast("A tela dividida precisa de 2 trechos: o de cima e o de baixo");
+  const j={ id:newId(), marca:MARCA, titulo:$("#tituloIn").value.trim()||"Job sem nome", prog:$("#progSel").value||null, progNome:($("#progSel").selectedOptions[0]||{}).textContent||"", trello:draft.trello||null, origem:draft.origem||null, ep:$("#epIn").value.trim(), tipo:$("#tipoSel").value, fmt:$("#fmtSel").value, tarjaCor:$("#corSel").value, outs, prazo:$("#prazoIn").value, resp:$("#respIn").value.trim(), tarja:$("#tarjaIn").value.trim().replace(/^["“]|["”]$/g,""), briefing:$("#briefing").value,
+    segs:isSplit?[segs[0]]:segs, segB:isSplit?segs[1]:null, cues:[], kfs:[], samples:[], thumbs:[], mask:{on:false,y:82,h:12}, smooth:false, status:"Em produção", stage:"novo", fileName:draft.file.name, post:null, createdAt:new Date().toISOString(), updatedAt:new Date().toISOString() };
   FILES[j.id]=draft.file; if(draft.handle) await idb.set("handles", j.id, draft.handle).catch(()=>{});
   JOBS.push(j); cur=j; await saveJob(j,true);
+  if(j.origem && typeof marcarUsado==="function") marcarUsado(j);
   $("#createJob").disabled=true;
   try{ await analyze(j); }catch(e){ console.error(e); toast(e.message||"Falhou"); }
   $("#createJob").disabled=false;
-  draft={file:null,handle:null}; titleTouched=false; ["#briefing","#tarjaIn","#respIn","#epIn"].forEach(s=>$(s).value=""); renderRows([]); $("#brutoName").textContent="Nenhum arquivo escolhido"; $("#dropBruto").classList.remove("has");
+  draft={file:null,handle:null}; titleTouched=false; $("#corWrap").hidden=!(MARCA==="gnt"&&$("#fmtSel").value==="Tarja Sensacionalista"); ["#briefing","#tarjaIn","#respIn","#epIn"].forEach(s=>$(s).value=""); renderRows([]); $("#brutoName").textContent="Nenhum arquivo escolhido"; $("#dropBruto").classList.remove("has");
   if(j.stage!=="processado"){ $("#anDone").hidden=false; }
 });
 
@@ -1639,8 +1921,8 @@ async function openRevisao(){
   $("#revBody").hidden=false; $("#revTitle").textContent=cur.titulo;
   if(!cur.outs.includes(pvFmt)) pvFmt=cur.outs[0]||"9x16";
   $("#pvFmt").innerHTML=Object.keys(FMTS).map(f=>`<button class="chip" data-pf="${f}" aria-pressed="${f===pvFmt}">${f}${cur.outs.includes(f)?"":" (prévia)"}</button>`).join("");
-  $("#fmtEd").innerHTML=FORMATOS.map(f=>`<option value="${f}" ${f===cur.fmt?"selected":""}>${f==="Vídeo Aspas"?"Tarja Aspas":f}</option>`).join("");
-  cur.tarjaCor = ({roxo:"roxa",branco:"branca-roxa"})[cur.tarjaCor] || cur.tarjaCor || "roxa"; $("#corEd").value = cur.tarjaCor; $("#corEd").hidden = cur.fmt!=="Tarja Sensacionalista";
+  $("#fmtEd").innerHTML=formatosDe(marcaDe(cur)).map(f=>`<option value="${f}" ${f===cur.fmt?"selected":""}>${fmtNome(f)}</option>`).join("");
+  cur.tarjaCor = ({roxo:"roxa",branco:"branca-roxa"})[cur.tarjaCor] || cur.tarjaCor || "roxa"; $("#corEd").value = cur.tarjaCor; $("#corEd").hidden = !(marcaDe(cur)==="gnt" && cur.fmt==="Tarja Sensacionalista");
   $("#tarjaEd").value=cur.tarja||""; tarjaCount();
   $("#smooth").checked=!!cur.smooth;
   const m=cur.mask||{on:false,y:82,h:12}; $("#maskOn").checked=m.on; $("#maskY").value=m.y; $("#maskH").value=m.h; maskLabels();
@@ -1657,6 +1939,7 @@ async function showAt(o){
 }
 function draw(){
   if(!cur) return; const t=video.currentTime; const o=srcToOut(cur,t); if(o!=null) outPos=o;
+  if(segBOf(cur)) syncV2(cur, t, previewPlaying);
   drawFrame(pctx, pv.width, pv.height, pvFmt, cur, t, {outT:outPos});
   const D=outDur(cur); $("#scrub").value=D?Math.round(outPos/D*1000):0; $("#tNow").textContent=fmtT(outPos)+" / "+fmtT(D);
   $$("#cueList .item").forEach(el=>el.classList.toggle("now", (()=>{ const c=cur.cues[+el.dataset.i]; return c && t>=c.s && t<c.e; })()));
@@ -1674,11 +1957,11 @@ async function playPreview(){
   }
   stopPreview();
 }
-function stopPreview(){ previewPlaying=false; abortRun=true; video.pause(); $("#playBtn").textContent="▶ Play"; setTimeout(()=>{abortRun=false;},50); }
+function stopPreview(){ previewPlaying=false; abortRun=true; video.pause(); video2.pause(); $("#playBtn").textContent="▶ Play"; setTimeout(()=>{abortRun=false;},50); }
 $("#playBtn").addEventListener("click", ()=>previewPlaying?stopPreview():playPreview());
 $("#scrub").addEventListener("input", e=>{ if(previewPlaying) stopPreview(); showAt(e.target.value/1000*outDur(cur)); });
 $("#pvFmt").addEventListener("click", e=>{ const b=e.target.closest("[data-pf]"); if(!b) return; pvFmt=b.dataset.pf; $$("#pvFmt [data-pf]").forEach(x=>x.setAttribute("aria-pressed", x===b)); setPvSize(); draw(); });
-$("#revStatus").addEventListener("change", e=>{ if(!cur) return; cur.status=e.target.value; cur.updatedAt=new Date().toISOString(); saveJob(cur); toast("Status atualizado"); });
+$("#revStatus").addEventListener("change", e=>{ if(!cur) return; cur.status=e.target.value; cur.updatedAt=new Date().toISOString(); saveJob(cur); toast("Status atualizado"); if(typeof aoMudarStatus==="function") aoMudarStatus(cur); });
 $("#reAnalyze").addEventListener("click", async ()=>{ if(!cur) return; go("novo"); try{ await analyze(cur); }catch(e){ toast(e.message||"Falhou"); } });
 // arrastar pra reenquadrar
 let drag=null;
@@ -1696,7 +1979,7 @@ $("#smooth").addEventListener("change", e=>{ cur.smooth=e.target.checked; saveJo
 ["#maskY","#maskH"].forEach(s=>$(s).addEventListener("input", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; maskLabels(); draw(); saveJob(cur); }));
 $("#maskOn").addEventListener("change", ()=>{ cur.mask={on:$("#maskOn").checked, y:+$("#maskY").value, h:+$("#maskH").value}; draw(); saveJob(cur); });
 $("#tarjaEd").addEventListener("input", e=>{ cur.tarja=e.target.value; tarjaCount(); draw(); saveJob(cur); });
-$("#fmtEd").addEventListener("change", e=>{ cur.fmt=e.target.value; $("#corEd").hidden = cur.fmt!=="Tarja Sensacionalista"; draw(); saveJob(cur); });
+$("#fmtEd").addEventListener("change", e=>{ cur.fmt=e.target.value; $("#corEd").hidden = !(marcaDe(cur)==="gnt" && cur.fmt==="Tarja Sensacionalista"); if(cur.fmt==="Tela dividida") prepVideo2(); draw(); saveJob(cur); });
 $("#corEd").addEventListener("change", e=>{ cur.tarjaCor=e.target.value; draw(); saveJob(cur); });
 
 function renderSegs(){
@@ -1786,6 +2069,7 @@ function importSrt(txt){
   saveJob(cur); renderCues(); draw(); toast(cur.cues.length+" legendas importadas");
 }
 $("#cueList").addEventListener("input", e=>{ const ta=e.target.closest("[data-ctext]"); if(!ta) return; cur.cues[+ta.dataset.ctext].text=ta.value; saveJob(cur); draw(); });
+$("#cueList").addEventListener("focusout", e=>{ const ta=e.target.closest("[data-ctext]"); if(!ta||!cur) return; const c=cur.cues[+ta.dataset.ctext]; if(c && c.o && c.o!==c.text && typeof aprenderCorrecao==="function"){ aprenderCorrecao(c.o, c.text, chaveRef(cur), marcaDe(cur)); c.o=c.text; saveJob(cur); } });
 $("#cueList").addEventListener("change", e=>{ const inp=e.target.closest("[data-ct]"); if(!inp) return; const i=+inp.closest("[data-i]").dataset.i, v=parseT(inp.value); if(isNaN(v)) return toast("Tempo inválido"); cur.cues[i][inp.dataset.ct]=v; cur.cues.sort((a,b)=>a.s-b.s); saveJob(cur); renderCues(); draw(); });
 $("#cueList").addEventListener("click", e=>{
   const g=e.target.closest("[data-cgo]"), sp=e.target.closest("[data-csplit]"), mg=e.target.closest("[data-cmerge]"), dl=e.target.closest("[data-cdel]");
@@ -1800,7 +2084,7 @@ $("#fixGuide").addEventListener("click", ()=>{ if(!cur) return; cur.cues=applyGu
 /* ---------- entrega ---------- */
 const OUTS = {};   // jobId -> {fmt: {blob,url,ext}}
 let thumbSel = 0;
-function baseName(j){ const d=new Date(); const dm=String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0"); return dm+"_GNT_"+j.titulo.replace(/[·"?,/\\:]/g," ").replace(/\s+/g," ").trim().normalize("NFD").replace(/[̀-ͯ]/g,""); }
+function baseName(j){ const d=new Date(); const dm=String(d.getDate()).padStart(2,"0")+String(d.getMonth()+1).padStart(2,"0"); return dm+"_"+MARCAS[marcaDe(j)].nome+"_"+j.titulo.replace(/[·"?,/\\:]/g," ").replace(/\s+/g," ").trim().normalize("NFD").replace(/[̀-ͯ]/g,""); }
 function download(blob, name){ const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{ URL.revokeObjectURL(a.href); a.remove(); }, 4000); }
 function pickMime(){ const c=["video/mp4;codecs=avc1.640028,mp4a.40.2","video/mp4;codecs=avc1,mp4a","video/mp4","video/webm;codecs=vp9,opus","video/webm"]; return c.find(m=>window.MediaRecorder&&MediaRecorder.isTypeSupported(m))||""; }
 async function renderEntrega(){
@@ -1830,10 +2114,11 @@ $("#renderBtn").addEventListener("click", async ()=>{
   try{
     for(const s of segsOf(cur)){
       await seek(s.in);
+      if(segBOf(cur)){ prepVideo2(); const tg=v2Target(cur,s.in); await new Promise(res=>{ const done=()=>{ video2.removeEventListener("seeked",done); res(); }; video2.addEventListener("seeked",done); video2.currentTime=tg; setTimeout(res,3000); }); }
       rigs.forEach(r=>drawFrame(r.ctx,r.W,r.H,r.f,cur,s.in,{outT:acc}));
       await playRange(s.in, s.out, t=>{
         if(t>s.out) return;
-        const oT=acc+(t-s.in); rigs.forEach(r=>drawFrame(r.ctx,r.W,r.H,r.f,cur,t,{outT:oT}));
+        const oT=acc+(t-s.in); if(segBOf(cur)) syncV2(cur, t, true); rigs.forEach(r=>drawFrame(r.ctx,r.W,r.H,r.f,cur,t,{outT:oT}));
         $("#rBar").style.width=Math.round(oT/D*100)+"%"; $("#rStatus").textContent=`Gravando ${fmtT(oT)} de ${fmtT(D)}`;
       }, {noSeek:true, beforePlay:()=>rigs.forEach(r=>r.rec.state==="inactive"?r.rec.start(1000):r.rec.resume())});
       rigs.forEach(r=>{ if(r.rec.state==="recording") r.rec.pause(); });
@@ -1848,7 +2133,7 @@ $("#renderBtn").addEventListener("click", async ()=>{
       $("#rBar").style.width="100%"; $("#rStatus").textContent=`Pronto: ${rigs.length} vídeo${rigs.length>1?"s":""} em ${ext.toUpperCase()}.`;
     }
   }catch(e){ console.error(e); $("#rStatus").textContent="O render falhou: "+(e.message||e); }
-  monitor.gain.value=1; rendering=false; $("#renderBtn").disabled=false; $("#stopRender").hidden=true; renderOuts(); renderFiles();
+  monitor.gain.value=1; video2.pause(); rendering=false; $("#renderBtn").disabled=false; $("#stopRender").hidden=true; renderOuts(); renderFiles();
 });
 $("#stopRender").addEventListener("click", ()=>{ abortRun=true; });
 
@@ -1901,18 +2186,20 @@ const EMOJI_RE=/\p{Extended_Pictographic}(?:️|‍\p{Extended_Pictographic}|\p{
 const countEmoji=s=>(s.match(EMOJI_RE)||[]).length, countChars=s=>[...s].length, words=s=>String(s||"").trim().split(/\s+/).filter(Boolean).length;
 const clean=s=>String(s||"").replace(/\s*—\s*/g,", ").trim();
 const refsOf=k=>(PROGRAMAS[k]?PROGRAMAS[k].exemplos:[]).concat(REFS[k]||[]);
-function ctaOf(j){ return j.prog&&PROGRAMAS[j.prog]?PROGRAMAS[j.prog].cta:""; }
+function ctaOf(j){ const m=marcaDe(j); if(m!=="gnt") return TOM_MARCA[m]?TOM_MARCA[m].cta:""; return j.prog&&PROGRAMAS[j.prog]?PROGRAMAS[j.prog].cta:""; }
 function buildPrompt(j){
-  const P=PROGRAMAS[j.prog], refs=refsOf(j.prog);
-  const tom=P.tom.length?P.tom.map(t=>"- "+t).join("\n"):"- Ainda não há guia de tom para este programa. Use o tom geral do GNT: afetuoso, próximo, coloquial, com humor leve e frases de identificação.";
-  const ex=refs.length?refs.slice(0,40).map((r,i)=>(i+1)+". "+r).join("\n"):"(nenhuma legenda de referência disponível)";
+  const m=marcaDe(j), M=MARCAS[m], gnt=m==="gnt", P=gnt?PROGRAMAS[j.prog]:null;
+  const nome=gnt?P.nome:(progNome(j)||"(sem título definido)");
+  const tomL=gnt?(P.tom.length?P.tom:["Ainda não há guia de tom para este programa. Use o tom geral do GNT: afetuoso, próximo, coloquial, com humor leve e frases de identificação."]):tomMarca(m);
+  const refs=gnt?refsOf(j.prog):(REFS["b:"+m]||[]);
+  const ex=refs.length?refs.slice(0,40).map((r,i)=>(i+1)+". "+r).join("\n"):"(nenhuma legenda de referência disponível ainda)";
   const fala=cuesOut(j).map(c=>c.text).join("\n");
-  return `Você é redator de redes sociais do canal GNT. Escreva 5 legendas de Instagram para um corte do programa "${P.nome}".
+  return `Você é redator de redes sociais da conta ${M.nome}. Escreva 5 legendas de Instagram para um corte de "${nome}".
 
-TOM DO PROGRAMA
-${tom}
+TOM ${gnt?"DO PROGRAMA":"DA MARCA"}
+${tomL.map(t=>"- "+t).join("\n")}
 
-LEGENDAS REAIS JÁ PUBLICADAS PELO @gnt PARA ESSE PROGRAMA (referência de tom, ritmo e vocabulário; não copie nenhuma)
+LEGENDAS JÁ APROVADAS (referência de tom, ritmo e vocabulário; não copie nenhuma)
 ${ex}
 ${j.tarja?`\nTARJA DO BRIEFING\n"${j.tarja}"\n`:""}
 FALA DO CORTE (transcrição)
@@ -1921,9 +2208,9 @@ ${fala}
 REGRAS DE CADA LEGENDA
 - Entre 110 e 135 caracteres, contando espaços.
 - Exatamente 1 emoji.
-- Português do Brasil, no tom do programa acima.
+- Português do Brasil, no tom acima.
 - Não use travessão.
-- Não escreva o CTA de horário nem hashtag do programa: isso entra depois, automaticamente.
+- Não escreva CTA de horário nem hashtag: isso entra depois, automaticamente.
 - Fale só do que está na fala do corte. Não invente nomes, fatos ou detalhes que não estejam ali.
 - As 5 precisam ter abordagens diferentes: pergunta de identificação, frase marcante do trecho, humor ou meme, emoção, e contexto do papo.
 
@@ -1936,8 +2223,9 @@ Responda só com JSON, neste formato:
 {"legendas":[{"abordagem":"...","texto":"..."}],"tarja_sensacionalista":"...","tarja_contexto":"...","pov":"..."}`;
 }
 function renderCapsBox(){
-  const j=cur, P=j.prog&&PROGRAMAS[j.prog], key=lsGet("apiKey","");
-  if(!P){ $("#capSub").textContent="Este job não tem programa do GNT."; $("#genBtn").disabled=true; }
+  const j=cur, P=j.prog&&PROGRAMAS[j.prog], key=lsGet("apiKey",""), mk=marcaDe(j);
+  if(mk!=="gnt"){ const ex=(REFS["b:"+mk]||[]).length; $("#capSub").innerHTML=`<span class="pill neutral">${esc(MARCAS[mk].nome)}</span> &nbsp;tom da marca${progNome(j)?" · "+esc(progNome(j)):""}${ex?` · ${ex} legendas aprovadas de referência`:""}`; $("#genBtn").disabled=false; }
+  else if(!P){ $("#capSub").textContent="Este job não tem programa do GNT."; $("#genBtn").disabled=true; }
   else { const own=P.exemplos.length, ex=(REFS[j.prog]||[]).length; $("#capSub").innerHTML=`<span class="pill ${own>=25?"ok":own?"warn":"bad"}">${esc(P.nome)}</span> &nbsp;tom tirado de ${own} legendas reais do @gnt${ex?` + ${ex} de vocês`:""}`; $("#genBtn").disabled=false; }
   if(!key){ $("#genStatus").innerHTML=`Pra gerar, cole a sua chave da API em <button class="linkbtn" style="color:var(--accent-2)" data-go="config">Configurações</button>.`; }
   else if(!cuesOut(j).length) $("#genStatus").textContent="O corte ainda não tem legendas. A transcrição é a base das legendas do post.";
@@ -1964,18 +2252,12 @@ $("#caps").addEventListener("click", e=>{ const c=e.target.closest("[data-copy]"
   if(p){ const i=+p.dataset.pick; cur.post.chosen=cur.post.chosen===i?null:i; saveJob(cur); renderCaps(); renderFiles(); } });
 $("#genBtn").addEventListener("click", async ()=>{
   const key=lsGet("apiKey",""); if(!key){ go("config"); return toast("Cole a chave da API primeiro"); }
-  if(!cur.prog) return; if(!cuesOut(cur).length) return toast("O corte ainda não tem legendas");
-  $("#genBtn").disabled=true; $("#genStatus").textContent=`Lendo ${refsOf(cur.prog).length} legendas de ${PROGRAMAS[cur.prog].nome} e escrevendo...`;
+  const gnt=marcaDe(cur)==="gnt"; if(gnt && !PROGRAMAS[cur.prog]) return; if(!cuesOut(cur).length) return toast("O corte ainda não tem legendas");
+  $("#genBtn").disabled=true; $("#genStatus").textContent=gnt?`Lendo ${refsOf(cur.prog).length} legendas de ${PROGRAMAS[cur.prog].nome} e escrevendo...`:`Lendo o tom de ${MARCAS[marcaDe(cur)].nome} e escrevendo...`;
   try{
-    const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:settings.apiModel||"claude-sonnet-5-5",max_tokens:16000,messages:[{role:"user",content:buildPrompt(cur)}]})});
-    const raw=await r.text(); let data=null; try{ data=JSON.parse(raw); }catch(e){}
-    if(!r.ok){ const m=data&&data.error&&data.error.message; throw new Error(r.status===401?"a chave foi recusada (401). Confira se é uma chave de API (começa com sk-ant-api) e se ainda vale.":(m||("a API respondeu com erro "+r.status))); }
-    if(!data) throw new Error("a API respondeu algo que não é JSON. Tente de novo.");
-    const txt=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+    const {text:txt, data}=await callClaude({max_tokens:16000, messages:[{role:"user",content:buildPrompt(cur)}], recurso:"Legendas do post", marca:marcaDe(cur)});
     if(!txt.trim()) throw new Error(data.stop_reason==="max_tokens"?"a resposta foi cortada antes do texto. Tente de novo.":"a resposta veio sem texto. Tente de novo.");
-    const a=txt.indexOf("{"), z=txt.lastIndexOf("}");
-    if(a<0||z<=a) throw new Error("a resposta veio fora do formato. Tente de novo.");
-    const js=JSON.parse(txt.slice(a, z+1));
+    const js=parseJSON(txt);
     cur.post={legendas:(js.legendas||[]).slice(0,5).map(l=>typeof l==="string"?{texto:clean(l),abordagem:""}:{texto:clean(l.texto),abordagem:String(l.abordagem||"")}), tarja_sensacionalista:clean(js.tarja_sensacionalista), tarja_contexto:clean(js.tarja_contexto), pov:clean(js.pov), chosen:null, geradoEm:new Date().toISOString()};
     saveJob(cur); renderCaps(); renderFiles();
     const fora=cur.post.legendas.filter(l=>{ const c=countChars(l.texto); return c<110||c>135||countEmoji(l.texto)!==1; }).length;
@@ -1984,9 +2266,65 @@ $("#genBtn").addEventListener("click", async ()=>{
   $("#genBtn").disabled=false;
 });
 
+/* ---------- IA: uma chamada só pra toda a plataforma, com contagem de uso ---------- */
+async function callClaude({system, messages, max_tokens=8000, tools, recurso="Outro", marca=MARCA, model}){
+  const key=lsGet("apiKey",""); if(!key){ const e=new Error("Cole a chave da API em Configurações."); e.code="nokey"; throw e; }
+  const body={model:model||settings.apiModel||"claude-sonnet-5-5", max_tokens, messages}; if(system) body.system=system; if(tools&&tools.length) body.tools=tools;
+  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
+  const raw=await r.text(); let data=null; try{ data=JSON.parse(raw); }catch(e){}
+  if(!r.ok){ const m=data&&data.error&&data.error.message; const e=new Error(r.status===401?"a chave foi recusada (401). Confira se é uma chave de API (começa com sk-ant-api) e se ainda vale.":(m||("a API respondeu com erro "+r.status))); e.status=r.status; e.apiMsg=m||""; throw e; }
+  if(!data) throw new Error("a API respondeu algo que não é JSON. Tente de novo.");
+  const u=data.usage||{}; registrarUso({marca, recurso, inp:(u.input_tokens||0)+(u.cache_read_input_tokens||0)+(u.cache_creation_input_tokens||0), out:u.output_tokens||0, buscas:(u.server_tool_use&&u.server_tool_use.web_search_requests)||0, model:body.model});
+  const text=(data.content||[]).filter(b=>b.type==="text").map(b=>b.text).join("");
+  return {text, data};
+}
+function parseJSON(txt){
+  const a1=txt.indexOf("{"), a2=txt.indexOf("["); let a=a1<0?a2:(a2<0?a1:Math.min(a1,a2)); if(a<0) throw new Error("a resposta veio fora do formato. Tente de novo.");
+  const close=txt[a]==="{"?"}":"]", z=txt.lastIndexOf(close); if(z<=a) throw new Error("a resposta veio cortada. Tente de novo.");
+  return JSON.parse(txt.slice(a,z+1));
+}
+let USO=[];
+function registrarUso(x){ x.ts=new Date().toISOString(); USO.push(x); if(USO.length>3000) USO=USO.slice(-3000); idb.set("kv","uso",USO).catch(()=>{}); if(typeof checarLimite==="function") checarLimite(); }
+
+/* ---------- tom das marcas (Globoplay e Telecine seguem o deck; dá pra editar em Tom e regras) ---------- */
+const TOM_MARCA = {
+  globoplay:{
+    tom:["Fala como fã que maratona: conversa entre amigos, sem formalidade.",
+      "Memes de novela, série e reality do catálogo: reação exagerada, identificação, “quem nunca”.",
+      "Nas legendas do vídeo, tudo minúsculo e sem ponto final.",
+      "Cita o título e convida a assistir no globoplay, sem soar como anúncio.",
+      "Humor de internet com carinho pelos personagens, sem expor ninguém."],
+    cta:"▶️ tá no globoplay"},
+  telecine:{
+    tom:["Cinéfilo bem-humorado: transforma cenas de filme em situações do dia a dia (segunda, feriado, data comemorativa).",
+      "Tarja curta, direta e em caixa alta, com a situação de identificação.",
+      "Legenda do vídeo amarela, começando com maiúscula.",
+      "Sempre dá crédito ao filme e lembra onde assistir: no Telecine.",
+      "Humor leve e afetivo, sem spoiler pesado."],
+    cta:"🎬 Assista no Telecine"}
+};
+function tomMarca(m){ const o=(settings.tomMarca||{})[m]; return o&&o.length?o:(TOM_MARCA[m]?TOM_MARCA[m].tom:[]); }
+function chaveRef(j){ return marcaDe(j)==="gnt" ? j.prog : "b:"+marcaDe(j); }
+
 /* ---------- tom dos programas ---------- */
 let tomSel="angelica";
 function renderTom(){
+  const m=MARCA, M=MARCAS[m];
+  $("#tomEyebrow").textContent="Referência · "+M.nome;
+  if(typeof renderRegras==="function") renderRegras();
+  if(m!=="gnt"){
+    $("#tomSub").textContent="Tom da marca, legendas aprovadas e regras que o Estúdio aprendeu com as correções da equipe.";
+    $("#progs").innerHTML=""; const ext=REFS["b:"+m]||[];
+    $("#tomDetail").innerHTML=`<div class="card"><h2>${esc(M.nome)}</h2><p class="sub">Guia de tom da marca. Edite à vontade: vale pra Fábrica, decupagem e legendas do post.</p>
+      <label class="f" style="margin-top:12px">Tom (uma regra por linha)<textarea id="tomMarcaIn" rows="7">${esc(tomMarca(m).join("\n"))}</textarea></label>
+      <div class="ctabox">${esc((TOM_MARCA[m]||{}).cta||"")}</div>
+      <div class="row" style="margin-top:10px"><button class="btn sm" id="tomMarcaSave">Salvar tom</button><button class="btn sm ghost" id="tomMarcaReset">Voltar ao padrão</button></div></div>
+      <div class="card"><h2>Legendas aprovadas</h2><p class="sub">Entram sozinhas quando um job da marca é aprovado. Também dá pra colar, uma por linha.</p>
+      <label class="f" style="margin-top:12px"><textarea id="refIn" rows="9">${esc(ext.join("\n"))}</textarea></label>
+      <div class="row" style="margin-top:10px"><button class="btn sm" id="refSave">Salvar referências</button></div></div>`;
+    return;
+  }
+  $("#tomSub").textContent="Até 30 legendas reais por programa, tiradas dos ~900 posts mais recentes do @gnt, mais as aprovadas pela equipe.";
   $("#progs").innerHTML=ORDER.map(k=>{ const n=PROGRAMAS[k].exemplos.length, ex=(REFS[k]||[]).length; const [cl,lbl]=n>=25?["ok",n+" legendas"]:n?["warn",n+" legendas · base curta"]:["bad","sem base no @gnt"]; return `<button class="prog" data-p="${k}" aria-pressed="${tomSel===k}"><strong>${PROGRAMAS[k].nome}</strong><span class="pill ${cl}">${lbl}</span>${ex?`<span class="small muted">+ ${ex} de vocês</span>`:""}</button>`; }).join("");
   const P=PROGRAMAS[tomSel], ext=REFS[tomSel]||[];
   $("#tomDetail").innerHTML=`<div class="card"><h2>${esc(P.nome)}</h2><p class="sub">${esc(P.dia)}</p>
@@ -1997,7 +2335,12 @@ function renderTom(){
     <div class="card"><h2>Legendas reais do @gnt</h2>${P.exemplos.length?`<ol class="ex" style="margin-top:12px">${P.exemplos.map((x,i)=>`<li><i>${String(i+1).padStart(2,"0")}</i><span>${esc(x)}</span></li>`).join("")}</ol>`:`<div class="empty" style="margin-top:12px">Sem legendas coletadas.</div>`}</div>`;
 }
 $("#progs").addEventListener("click", e=>{ const b=e.target.closest("[data-p]"); if(b){ tomSel=b.dataset.p; renderTom(); } });
-$("#tomDetail").addEventListener("click", async e=>{ if(!e.target.closest("#refSave")) return; REFS[tomSel]=$("#refIn").value.split("\n").map(s=>s.trim()).filter(Boolean); await idb.set("kv","refs",REFS); renderTom(); toast("Referências salvas"); });
+$("#tomDetail").addEventListener("click", async e=>{
+  const k=MARCA==="gnt"?tomSel:"b:"+MARCA;
+  if(e.target.closest("#refSave")){ REFS[k]=$("#refIn").value.split("\n").map(s=>s.trim()).filter(Boolean); await idb.set("kv","refs",REFS); renderTom(); toast("Referências salvas"); }
+  if(e.target.closest("#tomMarcaSave")){ settings.tomMarca=settings.tomMarca||{}; settings.tomMarca[MARCA]=$("#tomMarcaIn").value.split("\n").map(s=>s.trim()).filter(Boolean); await saveSettings(); toast("Tom salvo"); }
+  if(e.target.closest("#tomMarcaReset")){ if(settings.tomMarca) delete settings.tomMarca[MARCA]; await saveSettings(); renderTom(); toast("Tom padrão de volta"); }
+});
 
 /* ---------- configurações ---------- */
 function renderConfig(){
@@ -2006,7 +2349,7 @@ function renderConfig(){
 }
 async function saveSettings(){ await idb.set("kv","settings",Object.assign({},settings)); }
 $("#apiKey").addEventListener("change", e=>{ lsSet("apiKey", e.target.value.trim()); toast("Chave salva neste navegador"); });
-$("#apiModel").addEventListener("change", e=>{ settings.apiModel=e.target.value.trim()||"claude-sonnet-5-5"; saveSettings(); });
+$("#apiModel").addEventListener("change", e=>{ lsSet("apiModel", e.target.value.trim()||"claude-sonnet-5-5"); settings.apiModel=e.target.value.trim()||"claude-sonnet-5-5"; saveSettings(); });
 $("#asrModel").addEventListener("change", e=>{ settings.asrModel=e.target.value; saveSettings(); });
 $("#handleIn").addEventListener("change", e=>{ const v=parseFloat(e.target.value.replace(",",".")); settings.handle=isNaN(v)?5:clamp(v,0,30); saveSettings(); });
 
@@ -2051,10 +2394,802 @@ $("#kitList").addEventListener("click", async e=>{ const b=e.target.closest("[da
   if(!isChrome) notice("Use o Google Chrome atualizado. Este navegador não tem tudo que o editor precisa.","bad");
   settings=Object.assign({apiModel:"claude-sonnet-5-5", asrModel:BEST_ASR, handle:5}, await idb.get("kv","settings").catch(()=>null)||{});
   if(!/_timestamped$/.test(settings.asrModel||"")) settings.asrModel = BEST_ASR;
+  lsSet("apiModel", settings.apiModel||"claude-sonnet-5-5");
   REFS=await idb.get("kv","refs").catch(()=>null)||{};
   JOBS=(await idb.all("jobs").catch(()=>[]))||[]; JOBS.forEach(j=>{ if(j.fmt==="Produtizado") j.fmt="IN/OUT"; });
   await loadKit(); renderPainel(); renderPickers();
   if(NO_AI) notice("Modo sem IA (teste): sem transcrição nem detector de rosto.","warn");
+})();
+/* ================================================================
+   PLATAFORMA: marcas, acervo, fábrica, potencial, atendimento,
+   formatos, custos e aprendizado. Roda no mesmo módulo do editor.
+   ================================================================ */
+const PLAT = {};
+const MB_URL = "https://cdn.jsdelivr.net/npm/mediabunny@1.59.1/+esm";
+let MB = null;
+async function mbLoad(){ return MB ||= await import(MB_URL); }
+const nid = p => p+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+const norm = s => String(s||"").toLocaleLowerCase("pt-BR").normalize("NFD").replace(/[̀-ͯ]/g,"");
+const mmss = t => { t=Math.max(0,Math.round(t||0)); const h=Math.floor(t/3600), m=Math.floor(t%3600/60), s=t%60; return (h?h+":"+String(m).padStart(2,"0"):String(m).padStart(2,"0"))+":"+String(s).padStart(2,"0"); };
+const fmtData = iso => { try{ return new Date(iso).toLocaleDateString("pt-BR",{day:"2-digit",month:"2-digit"})+" "+new Date(iso).toLocaleTimeString("pt-BR",{hour:"2-digit",minute:"2-digit"}); }catch(e){ return ""; } };
+
+/* ---------- seletor de marca ---------- */
+function renderBrandSw(){
+  $("#brandSw").innerHTML=Object.entries(MARCAS).map(([k,M])=>`<button data-marca="${k}" aria-pressed="${k===MARCA}" title="${M.nome}"><i style="background:linear-gradient(135deg,${M.cor},${M.cor2})"></i>${M.nome}</button>`).join("");
+}
+function setMarca(m){
+  if(!MARCAS[m]) return; MARCA=m; lsSet("marca", m); renderBrandSw();
+  const f=$("#atdFrame"); if(f && f.contentWindow && f.src) try{ f.contentWindow.postMessage({type:"estudio:marca", marca:m}, location.origin); }catch(e){}
+  go(view==="item"?"acervo":view);
+}
+$("#brandSw").addEventListener("click", e=>{ const b=e.target.closest("[data-marca]"); if(b) setMarca(b.dataset.marca); });
+
+/* ---------- datas comemorativas (fixas + móveis) ---------- */
+const DATAS_FIXAS = [
+  ["01-01","Ano Novo"],["01-25","Aniversário de São Paulo"],["01-30","Dia da Saudade"],
+  ["02-14","Valentine's Day"],["03-08","Dia Internacional da Mulher"],["03-15","Dia do Consumidor"],["03-20","Dia Internacional da Felicidade"],["04-01","Dia da Mentira"],
+  ["04-07","Dia Mundial da Saúde"],["04-13","Dia do Beijo"],["04-22","Dia da Terra"],["04-23","Dia do Livro"],["05-01","Dia do Trabalho"],["05-04","Dia de Star Wars (May the 4th)"],
+  ["05-15","Dia Internacional da Família"],["05-25","Dia do Orgulho Nerd"],["06-05","Dia do Meio Ambiente"],["06-12","Dia dos Namorados"],["06-13","Santo Antônio"],["06-24","São João"],["06-28","Dia do Orgulho LGBTQIA+"],
+  ["07-13","Dia do Rock"],["07-20","Dia do Amigo"],["07-26","Dia dos Avós"],["08-11","Dia do Estudante"],["08-19","Dia Mundial da Fotografia"],["08-29","Dia da Visibilidade Lésbica"],
+  ["09-07","Independência do Brasil"],["09-15","Dia do Cliente"],["09-21","Dia da Árvore"],["09-23","Início da primavera"],["10-01","Dia do Vendedor e Dia do Idoso"],["10-12","Dia das Crianças"],["10-15","Dia do Professor"],
+  ["10-31","Halloween"],["11-02","Finados"],["11-15","Proclamação da República"],["11-20","Dia da Consciência Negra"],["11-25","Black Friday (aprox.)"],["12-24","Véspera de Natal"],["12-25","Natal"],["12-31","Réveillon"]
+];
+function pascoa(y){ const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1; return new Date(y,mo-1,da); }
+function nDomingo(y,mes,n){ const d=new Date(y,mes,1); let c=0; while(true){ if(d.getDay()===0){ c++; if(c===n) return new Date(d); } d.setDate(d.getDate()+1); } }
+function datasDoAno(y){
+  const out=DATAS_FIXAS.map(([md,n])=>({d:new Date(y,+md.slice(0,2)-1,+md.slice(3)), n}));
+  const p=pascoa(y), add=(base,dd,n)=>{ const d=new Date(base); d.setDate(d.getDate()+dd); out.push({d,n}); };
+  add(p,-47,"Carnaval"); add(p,-2,"Sexta-feira Santa"); add(p,0,"Páscoa"); add(p,60,"Corpus Christi");
+  out.push({d:nDomingo(y,4,2), n:"Dia das Mães"}); out.push({d:nDomingo(y,7,2), n:"Dia dos Pais"});
+  return out;
+}
+function proximasDatas(dias=12, voltar=2){
+  const hoje=new Date(); hoje.setHours(0,0,0,0); const y=hoje.getFullYear();
+  return datasDoAno(y).concat(datasDoAno(y+1)).filter(x=>{ const dd=(x.d-hoje)/864e5; return dd>=-voltar && dd<=dias; }).sort((a,b)=>a.d-b.d)
+    .map(x=>{ const dd=Math.round((x.d-hoje)/864e5); return {data:x.d.toLocaleDateString("pt-BR",{weekday:"short",day:"2-digit",month:"2-digit"}), nome:x.n, quando:dd===0?"hoje":dd===1?"amanhã":dd===-1?"ontem":dd<0?`há ${-dd} dias`:`em ${dd} dias`}; });
+}
+
+/* ---------- aprendizado: correções viram regra ---------- */
+let GLOSS = {};   // chave -> {de: {para, n}}
+function tokensOf(s){ return String(s||"").split(/\s+/).filter(Boolean); }
+const bare = w => norm(w).replace(/[^\p{L}\p{N}]/gu,"");
+function aprenderCorrecao(de, para, chave, marca){
+  const A=tokensOf(de), B=tokensOf(para); if(!A.length||!B.length) return;
+  // alinhamento simples por LCS nas palavras sem pontuação
+  const n=A.length, m=B.length, L=Array.from({length:n+1},()=>new Int16Array(m+1));
+  for(let i=n-1;i>=0;i--) for(let j=m-1;j>=0;j--) L[i][j]= bare(A[i])===bare(B[j]) ? L[i+1][j+1]+1 : Math.max(L[i+1][j],L[i][j+1]);
+  const pares=[]; let i=0,j=0, da=[], db=[];
+  const fecha=()=>{ if(da.length&&db.length&&da.length<=3&&db.length<=3){ const f=da.map(bare).join(" "), t=db.map(w=>w.replace(/[.,;:!?…"“”]+$/,"")).join(" "); if(f && f!==bare(t)) pares.push([f,t]); } da=[]; db=[]; };
+  while(i<n||j<m){
+    if(i<n&&j<m&&bare(A[i])===bare(B[j])){ fecha(); i++; j++; }
+    else if(j<m&&(i>=n||L[i][j+1]>=L[i+1][j])){ db.push(B[j]); j++; }
+    else { da.push(A[i]); i++; }
+  }
+  fecha(); if(!pares.length) return;
+  for(const k of [chave, "m:"+marca]){ if(!k) continue; const g=GLOSS[k] ||= {}; pares.forEach(([f,t])=>{ const e=g[f] ||= {para:t, n:0}; if(e.para!==t){ e.para=t; e.n=0; } e.n++; }); }
+  idb.set("kv","gloss",GLOSS).catch(()=>{});
+  toast(`Aprendi ${pares.length===1?"uma correção":pares.length+" correções"}: ${pares.map(p=>`“${p[0]}” → “${p[1]}”`).join(", ")}`);
+}
+function regraAtiva(e, de){ return e.n>=2 || e.fixa || (/^\p{Lu}/u.test(e.para) && bare(e.para)!==de); }
+function aplicarGlossario(text, chave, marca){
+  let t=String(text||"");
+  for(const k of [chave, "m:"+marca]){ const g=GLOSS[k]; if(!g) continue;
+    for(const [de,e] of Object.entries(g)){ if(!regraAtiva(e,de)) continue;
+      const pat=de.split(" ").map(w=>w.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")).join("[\\s,.;:!?…]+");
+      try{ t=t.replace(new RegExp("(^|[^\\p{L}\\p{N}])("+pat+")(?=$|[^\\p{L}\\p{N}])","giu"), (m0,pre)=>pre+e.para); }catch(err){}
+    } }
+  return t;
+}
+function renderRegras(){
+  const box=$("#regrasCard"); if(!box) return; const m=MARCA;
+  const keys=Object.keys(GLOSS).filter(k=>k==="m:"+m || (m==="gnt"?PROGRAMAS[k]:k==="b:"+m));
+  const rows=[]; keys.forEach(k=>Object.entries(GLOSS[k]).forEach(([de,e])=>rows.push({k,de,e})));
+  rows.sort((a,b)=>b.e.n-a.e.n);
+  box.innerHTML=`<div class="head" style="align-items:center"><div><h2>O que o Estúdio aprendeu com as correções</h2><p class="sub">Toda vez que alguém corrige uma legenda na revisão, a troca fica guardada. Repetiu duas vezes, ou é nome próprio, vira regra e a próxima transcrição já sai certa.</p></div></div>
+  ${rows.length?`<div class="list" style="margin-top:12px">${rows.slice(0,80).map(r=>`<div class="item"><div class="top"><span class="mono small">“${esc(r.de)}” → <b>“${esc(r.e.para)}”</b></span><span class="tag">${r.k.startsWith("m:")?"toda a marca":esc(PROGRAMAS[r.k]?PROGRAMAS[r.k].nome:MARCAS[m].nome)}</span><span class="small muted">${r.e.n}×</span>${regraAtiva(r.e,r.de)?`<span class="tag star">regra ativa</span>`:`<button class="btn sm" data-gfix="${esc(r.k)}|${esc(r.de)}">Ativar já</button>`}<span style="margin-left:auto"></span><button class="btn sm ghost" data-gdel="${esc(r.k)}|${esc(r.de)}">tirar</button></div></div>`).join("")}</div>`:`<div class="empty" style="margin-top:12px">Ainda nenhuma correção. Elas aparecem aqui conforme a equipe revisa as legendas.</div>`}
+  <div class="row small muted" style="margin-top:14px"><b style="color:var(--fg)">Regra de legenda de ${esc(MARCAS[m].nome)}:</b> ${esc(regraDe(m).label||"")} · <button class="linkbtn" style="color:var(--accent-2)" data-go="formatos">mudar em Formatos e kit</button></div>`;
+}
+$("#regrasCard").addEventListener("click", e=>{
+  const d=e.target.closest("[data-gdel]"), f=e.target.closest("[data-gfix]");
+  const [k,de]=(d||f)?((d||f).dataset.gdel||(d||f).dataset.gfix).split("|"):[];
+  if(d){ delete GLOSS[k][de]; } else if(f){ GLOSS[k][de].fixa=true; } else return;
+  idb.set("kv","gloss",GLOSS).catch(()=>{}); renderRegras();
+});
+
+/* aprovou: a legenda escolhida vira referência do tom; job do Trello pode avisar o card */
+function aoMudarStatus(j){
+  if(j.status!=="Aprovado") return;
+  if(j.post && j.post.chosen!=null){ const t=clean(j.post.legendas[j.post.chosen].texto), k=chaveRef(j); if(k){ REFS[k]=REFS[k]||[]; if(!REFS[k].includes(t)){ REFS[k].unshift(t); REFS[k]=REFS[k].slice(0,60); idb.set("kv","refs",REFS).catch(()=>{}); toast("Aprovado: a legenda escolhida virou referência do tom"); } } }
+  if(j.trello && j.trello.id && !j.trello.avisado) mostrarAvisoTrello(j);
+}
+
+/* ---------- custos ---------- */
+function precoCfg(){ return Object.assign({inp:3, out:15, busca:10, limite:0}, settings.preco||{}); }
+function custoDe(u){ const p=precoCfg(); return (u.inp||0)/1e6*p.inp + (u.out||0)/1e6*p.out + (u.buscas||0)/1000*p.busca; }
+function usoDoMes(){ const ym=new Date().toISOString().slice(0,7); return USO.filter(u=>(u.ts||"").slice(0,7)===ym); }
+function checarLimite(){ const p=precoCfg(); if(!p.limite) return; const tot=usoDoMes().reduce((a,u)=>a+custoDe(u),0); if(tot>=p.limite) notice(`Limite de IA do mês atingido: US$ ${tot.toFixed(2)} de US$ ${p.limite}. Ajuste em Custos de IA.`,"warn"); else if(tot>=p.limite*0.8) notice(`Atenção: o gasto de IA do mês já passou de 80% do limite (US$ ${tot.toFixed(2)} de US$ ${p.limite}).`,"warn"); }
+PLAT.custos = ()=>{
+  const mes=usoDoMes(), tot=mes.reduce((a,u)=>a+custoDe(u),0), p=precoCfg();
+  const porM=Object.keys(MARCAS).map(m=>[m, mes.filter(u=>u.marca===m).reduce((a,u)=>a+custoDe(u),0)]);
+  $("#custoStats").innerHTML=`<div class="stat"><b>US$ ${tot.toFixed(2)}</b><span>este mês · R$ ${(tot*(p.cambio||5.4)).toFixed(2)}</span></div>`+porM.map(([m,v])=>`<div class="stat"><b>US$ ${v.toFixed(2)}</b><span>${MARCAS[m].nome}</span></div>`).join("")+`<div class="stat"><b>${mes.length}</b><span>chamadas no mês</span></div>`;
+  const rec={}; mes.forEach(u=>{ const r=rec[u.recurso] ||= {n:0,v:0}; r.n++; r.v+=custoDe(u); });
+  $("#custoRec").innerHTML=Object.keys(rec).length?`<div class="list">${Object.entries(rec).sort((a,b)=>b[1].v-a[1].v).map(([k,r])=>`<div class="item"><div class="top"><b>${esc(k)}</b><span class="small muted">${r.n} chamada${r.n>1?"s":""}</span><span style="margin-left:auto" class="mono">US$ ${r.v.toFixed(3)}</span></div><div class="progress"><b style="width:${tot?Math.round(r.v/tot*100):0}%"></b></div></div>`).join("")}</div>`:`<div class="empty">Nenhum uso de IA neste mês ainda.</div>`;
+  $("#custoCfg").innerHTML=`<div class="grid2" style="gap:10px">
+    <label class="f">US$ por milhão de tokens de entrada<input type="text" data-pc="inp" value="${p.inp}"></label>
+    <label class="f">US$ por milhão de tokens de saída<input type="text" data-pc="out" value="${p.out}"></label>
+    <label class="f">US$ por mil buscas na web<input type="text" data-pc="busca" value="${p.busca}"></label>
+    <label class="f">Câmbio (R$ por US$)<input type="text" data-pc="cambio" value="${p.cambio||5.4}"></label>
+    <label class="f">Limite do mês em US$ (0 = sem limite)<input type="text" data-pc="limite" value="${p.limite||0}"></label></div>
+    <p class="small muted" style="margin-top:10px">Confira os preços do modelo que vocês usam em console.anthropic.com. Os tokens vêm contados pela própria API em cada resposta.</p>`;
+  $("#custoLog").innerHTML=USO.slice(-60).reverse().map(u=>`<tr><td class="small">${fmtData(u.ts)}</td><td>${esc((MARCAS[u.marca]||{}).nome||"")}</td><td>${esc(u.recurso)}</td><td class="mono small">${(u.inp||0).toLocaleString("pt-BR")}</td><td class="mono small">${(u.out||0).toLocaleString("pt-BR")}</td><td class="mono small">${u.buscas||0}</td><td class="mono small">${custoDe(u).toFixed(4)}</td></tr>`).join("")||`<tr><td colspan="7" class="muted">Sem registros.</td></tr>`;
+};
+$("#custoCfg").addEventListener("change", async e=>{ const i=e.target.closest("[data-pc]"); if(!i) return; const v=parseFloat(String(i.value).replace(",",".")); if(isNaN(v)) return toast("Valor inválido"); settings.preco=Object.assign(precoCfg(),{[i.dataset.pc]:v}); await saveSettings(); PLAT.custos(); checarLimite(); });
+
+/* ---------- formatos e kit por marca ---------- */
+const FMT_DESC = {
+  gnt:{
+    "Tarja Sensacionalista":["Faixa no topo, sempre em 2 linhas, perto da base da faixa","4 cores: roxa, preta, branca, branca com letra roxa","O vídeo desce pra baixo da faixa, o rosto nunca fica coberto","Bug centralizado embaixo"],
+    "Tarja de Contexto":["Caixa roxa com texto branco, PP Mori SemiBold, blocado","Fica 4 s e sai (só movimento de saída)","Nunca em cima do rosto","Legenda branca com contorno 3"],
+    "Vídeo Aspas":["Caixa roxa com texto verde-limão e aspas nas pontas","Fica 4 s e sai","Nunca em cima do rosto","Bug no canto"],
+    "IN/OUT":["Sem tarja","Legenda GNT (contorno 3), um pouco mais alta","Bug animado na entrada","Saída 9x16, 4x5 e 1x1 do mesmo corte"]},
+  globoplay:{
+    "Tarja de Contexto":["Faixa clara no topo com texto escuro","O vídeo fica embaixo da faixa","Legenda tudo minúsculo, sem ponto","Logo do kit no canto, se carregado"],
+    "IN/OUT":["Sem tarja","Legenda tudo minúsculo, sem ponto","Logo do kit no canto, se carregado"]},
+  telecine:{
+    "Tarja de Contexto":["Faixa azul-marinho no topo","Texto branco em caixa alta","Legenda amarela com contorno","O vídeo fica embaixo da faixa"],
+    "Tela dividida":["Dois trechos empilhados: o de cima (com o som) e o de baixo","Um texto amarelo em cada metade: “de cima | de baixo”","Bom pra comparação: “eu no domingo | eu na segunda”","Duração = a do trecho de cima"],
+    "IN/OUT":["Sem tarja","Legenda amarela com contorno","Logo do kit no canto, se carregado"]}
+};
+function pvTarjaHTML(marca, fmt, tarja, legenda){
+  const t=esc(cleanTarja(tarja||"")), M=MARCAS[marca];
+  let o="";
+  if(marca==="gnt" && fmt==="Tarja Sensacionalista") o=`<div class="band" style="background:#3912B2;color:#fff">${t}</div>`;
+  else if(marca==="gnt" && (fmt==="Tarja de Contexto"||fmt==="Vídeo Aspas")) o=`<div class="tj" style="${fmt==="Vídeo Aspas"?"color:#D5E9AA":""}">${fmt==="Vídeo Aspas"?"“"+t+"”":t}</div>`;
+  else if(fmt==="Tarja de Contexto") o=`<div class="band" style="background:${marca==="globoplay"?"#ECECEE":"#0D0F63"};color:${marca==="globoplay"?"#111":"#fff"};${marca==="telecine"?"text-transform:uppercase;font-weight:800":""}">${t}</div>`;
+  else if(fmt==="Tela dividida"){ const [a,b]=String(tarja||"").split("|"); o=`<div class="lg" style="bottom:auto;top:40%;color:#FFE500;font-weight:800">${esc((a||"").trim())}</div><div class="lg" style="bottom:6%;color:#FFE500;font-weight:800">${esc((b||"").trim())}</div><div style="position:absolute;left:0;right:0;top:50%;height:2px;background:#000"></div>`; }
+  const lg=legenda?`<div class="lg" style="color:${regraDe(marca).cor}">${esc(legendaMarca({marca}, legenda))}</div>`:"";
+  return o+(fmt==="Tela dividida"?"":lg);
+}
+PLAT.formatos = ()=>{
+  const m=MARCA, M=MARCAS[m], rg=regraDe(m);
+  $("#fmtEyebrow").textContent="Marca · "+M.nome;
+  $("#fmtList").innerHTML=formatosDe(m).map(f=>`<div class="fmtcard"><div class="row" style="justify-content:space-between"><h2 style="font-size:16px">${esc(fmtNome(f))}</h2><span class="tag">${esc(M.nome)}</span></div>
+    <div class="row" style="align-items:flex-start;gap:14px;flex-wrap:nowrap"><div class="pv916" style="background-image:linear-gradient(160deg,#2a2a3a,#0d0d14)">${pvTarjaHTML(m,f,f==="Tela dividida"?"Eu no domingo | Eu na segunda":(m==="telecine"?"Quando a viagem em família sai do controle":"Ela falou o que ninguém tinha coragem"),"eu me zoava pra me defender")}</div>
+    <ul>${(FMT_DESC[m][f]||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div>`).join("");
+  const kitTxt = m==="gnt" ? `<p class="sub">O kit da GNT (PP Mori e bugs) fica em <button class="linkbtn" style="color:var(--accent-2)" data-go="config">Configurações</button>.</p>`
+    : `<p class="sub">Fonte e logo de ${esc(M.nome)}. Ficam só neste navegador (licença das fontes e da marca).</p>
+      <div class="drop" id="kitMarcaDrop" style="margin-top:12px"><span class="small muted">Arraste a fonte (.otf/.ttf/.woff2) e o logo em PNG transparente</span><label class="btn sm" for="kitMarcaIn" style="margin-left:auto;cursor:pointer">Escolher arquivos</label><input type="file" id="kitMarcaIn" multiple accept=".otf,.ttf,.woff,.woff2,.png,.webp" hidden></div>
+      <div class="files" style="margin-top:10px"><div><span>Fonte</span><em>${marcaFonts[m]?"carregada":"não carregada (usa DM Sans)"}</em></div><div><span>Logo</span><em>${marcaLogos[m]?"carregado":"não carregado"}</em></div></div>`;
+  $("#kitMarca").innerHTML=`<div class="grid2"><div><h2>Kit ${esc(M.nome)}</h2>${kitTxt}</div>
+    <div><h2>Regra de legenda</h2><p class="sub">Vale pro vídeo, pro .srt e pra revisão. Padrão do guia: ${esc(M.regra.label)}.</p>
+      <div class="grid2" style="gap:10px;margin-top:10px">
+        <label class="f">Caixa<select data-rg="caixa"><option value="frase" ${rg.caixa==="frase"?"selected":""}>Maiúscula só no começo</option><option value="minuscula" ${rg.caixa==="minuscula"?"selected":""}>Tudo minúsculo</option><option value="maiuscula" ${rg.caixa==="maiuscula"?"selected":""}>Tudo maiúsculo</option></select></label>
+        <label class="f">Cor<input type="color" data-rg="cor" value="${rg.cor}" style="height:38px;padding:3px"></label>
+        <label class="f" style="flex-direction:row;align-items:center;gap:8px"><input type="checkbox" data-rg="ponto" ${rg.ponto?"checked":""}> ponto final</label>
+        <div class="row"><button class="btn sm ghost" id="rgReset">Voltar ao padrão</button></div></div></div></div>`;
+};
+$("#kitMarca").addEventListener("change", async e=>{
+  const r=e.target.closest("[data-rg]"); if(r){ settings.regras=settings.regras||{}; const o=settings.regras[MARCA]=settings.regras[MARCA]||{}; o[r.dataset.rg]= r.type==="checkbox"?r.checked:r.value; o.label="personalizada"; await saveSettings(); PLAT.formatos(); if(cur) draw(); return; }
+  if(e.target.id==="kitMarcaIn"){ await kitMarcaFiles([...e.target.files]); e.target.value=""; }
+});
+$("#kitMarca").addEventListener("click", async e=>{ if(e.target.id==="rgReset"){ if(settings.regras) delete settings.regras[MARCA]; await saveSettings(); PLAT.formatos(); } });
+$("#kitMarca").addEventListener("dragover", e=>e.preventDefault());
+$("#kitMarca").addEventListener("drop", e=>{ e.preventDefault(); kitMarcaFiles([...e.dataTransfer.files]); });
+async function kitMarcaFiles(files){
+  for(const f of files){ const n=f.name.toLowerCase(); const buf=await f.arrayBuffer();
+    if(/\.(otf|ttf|woff2?)$/.test(n)) await idb.set("kv","kitm:font:"+MARCA, {name:f.name, type:f.type, buf});
+    else if(/\.(png|webp)$/.test(n)) await idb.set("kv","kitm:logo:"+MARCA, {name:f.name, type:f.type||"image/png", buf});
+  }
+  await loadKitMarcas(); PLAT.formatos(); toast("Kit da marca salvo neste navegador");
+}
+async function loadKitMarcas(){
+  for(const m of Object.keys(MARCAS)){ if(m==="gnt") continue;
+    const f=await idb.get("kv","kitm:font:"+m).catch(()=>null);
+    if(f&&f.buf){ try{ const ff=new FontFace("Marca "+m, f.buf); await ff.load(); document.fonts.add(ff); marcaFonts[m]=true; }catch(e){ console.warn(e); } }
+    const l=await idb.get("kv","kitm:logo:"+m).catch(()=>null);
+    if(l&&l.buf){ await new Promise(res=>{ const im=new Image(); im.onload=()=>{ marcaLogos[m]=im; res(); }; im.onerror=res; im.src=URL.createObjectURL(new Blob([l.buf],{type:l.type})); }); }
+  }
+}
+/* ================================================================
+   ACERVO INTELIGENTE
+   sobe o vídeo -> lê o arquivo direto (sem tocar) -> miniaturas ->
+   transcrição -> a IA entende as cenas e sugere momentos -> busca,
+   marcação, decupagem e envio pra produção.
+   ================================================================ */
+let TITULOS=[], ITENS=[]; const THUMBS={}; let acvModo="titulos", acvTipo="", acvTitulo=null, itemAtual=null;
+const TIPOS_T = {programa:"Programas", filme:"Filmes", serie:"Séries"};
+const TONS = ["feliz","triste","tensa","engraçada","emocionante","romântica","constrangedora","inspiradora","nostálgica","fofa","polêmica","informativa"];
+const THUMB_STEP = 8;
+const saveItem = it => idb.set("acervo", it.id, JSON.parse(JSON.stringify(it))).catch(()=>toast("Não deu pra salvar no acervo"));
+const saveTitulo = t => idb.set("titulos", t.id, t).catch(()=>{});
+async function thumbsOf(id){ if(THUMBS[id]) return THUMBS[id]; const r=await idb.get("thumbs", id).catch(()=>null); return THUMBS[id]=r||{step:THUMB_STEP,list:[]}; }
+function thumbAtSync(id, t){ const T=THUMBS[id]; if(!T||!T.list.length) return ""; const i=clamp(Math.round(t/T.step),0,T.list.length-1); return T.list[i]||""; }
+const tituloDe = it => TITULOS.find(t=>t.id===it.tituloId);
+const nomeItem = it => { const t=tituloDe(it); return (t?t.nome:"Sem título")+(it.ep?" · Ep "+it.ep:""); };
+
+/* ---------- arquivo ---------- */
+async function fileDoItem(it, pedir){
+  if(FILES["a:"+it.id]) return FILES["a:"+it.id];
+  const h=await idb.get("handles","a:"+it.id).catch(()=>null);
+  if(h && h.getFile){ try{ let p=await h.queryPermission({mode:"read"}); if(p!=="granted" && pedir) p=await h.requestPermission({mode:"read"}); if(p==="granted") return FILES["a:"+it.id]=await h.getFile(); }catch(e){} }
+  return null;
+}
+async function escolherVideos(){
+  if(window.showOpenFilePicker){
+    try{ const hs=await showOpenFilePicker({multiple:true, types:[{description:"Vídeo", accept:{"video/*":[".mp4",".mov",".m4v",".webm",".mkv"]}}]}); return Promise.all(hs.map(async h=>({file:await h.getFile(), handle:h}))); }
+    catch(e){ if(e.name==="AbortError") return []; }
+  }
+  return new Promise(res=>{ const inp=document.createElement("input"); inp.type="file"; inp.accept="video/*"; inp.multiple=true; inp.onchange=()=>res([...inp.files].map(f=>({file:f,handle:null}))); inp.click(); });
+}
+
+/* ---------- tela do acervo ---------- */
+PLAT.acervo = ()=>{
+  $("#acvEyebrow").textContent="Acervo · "+MARCAS[MARCA].nome;
+  const its=ITENS.filter(i=>i.marca===MARCA);
+  $("#acvTipo").innerHTML=[["","Tudo"],["filme","Filmes"],["serie","Séries"],["programa","Programas"]].map(([k,l])=>`<button class="chip" data-tp="${k}" aria-pressed="${acvTipo===k}">${l}</button>`).join("");
+  $$("#acvModo [data-m]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.m===acvModo));
+  const q=$("#acvBusca").value.trim();
+  if(q) return renderBusca(q);
+  if(!its.length){ $("#acvBody").innerHTML=`<div class="card empty">O acervo de ${esc(MARCAS[MARCA].nome)} ainda está vazio. Clique em <b>Subir no acervo</b> e escolha episódios ou filmes: o Estúdio transcreve, entende as cenas e sugere o que vale post.</div>`; return; }
+  if(acvModo==="momentos") return renderSugeridos(its);
+  if(acvTitulo) return renderEpisodios(acvTitulo);
+  const ts=TITULOS.filter(t=>t.marca===MARCA && (!acvTipo||t.tipo===acvTipo));
+  const grupos=["filme","serie","programa"].filter(tp=>!acvTipo||acvTipo===tp).map(tp=>[tp, ts.filter(t=>t.tipo===tp)]).filter(g=>g[1].length);
+  const semT=its.filter(i=>!tituloDe(i));
+  $("#acvBody").innerHTML=grupos.map(([tp,list])=>`<div class="sec-h"><h2>${TIPOS_T[tp]}</h2><span class="small muted">${list.length}</span></div><div class="tgrid">${list.map(cardTitulo).join("")}</div>`).join("")
+    + (semT.length?`<div class="sec-h"><h2>Sem título</h2></div><div class="tgrid">${semT.map(cardItem).join("")}</div>`:"")
+    + `<div class="sec-h"><h2>✦ Momentos sugeridos</h2><span class="small muted">o que o acervo acha que vale post</span></div>${gridMomentos(sugeridosDe(its).slice(0,8))}`;
+  hydrateThumbs();
+};
+function cardTitulo(t){
+  const its=ITENS.filter(i=>i.tituloId===t.id), proc=its.some(i=>i.status==="processando"), capa=its.find(i=>i.status==="pronto")||its[0];
+  return `<button class="tcard" data-tit="${t.id}"><div class="im" data-th="${capa?capa.id:""}" data-tt="${capa?Math.round((capa.dur||60)*0.2):0}">${proc?`<span class="badge">processando</span>`:""}</div><div class="tx"><b>${esc(t.nome)}</b><span>${its.length} ${t.tipo==="filme"?"arquivo":"episódio"}${its.length>1?"s":""}</span></div></button>`;
+}
+function cardItem(it){ return `<button class="tcard" data-item="${it.id}"><div class="im" data-th="${it.id}" data-tt="${Math.round((it.dur||60)*0.2)}">${it.status!=="pronto"?`<span class="badge">${esc(it.status==="erro"?"erro":"processando")}</span>`:""}<span class="tm">${mmss(it.dur)}</span></div><div class="tx"><b>${esc(nomeItem(it))}</b><span>${esc(it.resumo||it.fileName||"")}</span></div></button>`; }
+function renderEpisodios(tid){
+  const t=TITULOS.find(x=>x.id===tid); if(!t){ acvTitulo=null; return PLAT.acervo(); }
+  const its=ITENS.filter(i=>i.tituloId===tid).sort((a,b)=>(+a.ep||0)-(+b.ep||0));
+  $("#acvBody").innerHTML=`<div class="sec-h"><button class="btn sm" id="acvVoltar">← Todos</button><h2>${esc(t.nome)}</h2><span class="small muted">${TIPOS_T[t.tipo]||""}</span><span style="margin-left:auto"></span><button class="btn sm ghost" id="acvRenT">Renomear</button></div>
+    <div class="tgrid">${its.map(cardItem).join("")}</div>
+    <div class="sec-h"><h2>✦ Momentos sugeridos</h2></div>${gridMomentos(sugeridosDe(its))}`;
+  hydrateThumbs();
+}
+function sugeridosDe(its){ const out=[]; its.forEach(it=>(it.sugeridos||[]).forEach(s=>out.push({it, m:s, star:true}))); return out.sort((a,b)=>(b.it.criadoEm||"").localeCompare(a.it.criadoEm||"")); }
+function renderSugeridos(its){ $("#acvBody").innerHTML=`<div class="sec-h"><h2>✦ Momentos sugeridos</h2><span class="small muted">cenas com potencial de post: reação engraçada, emoção forte, frase marcante</span></div>${gridMomentos(sugeridosDe(its))}`; hydrateThumbs(); }
+function gridMomentos(list){
+  if(!list.length) return `<div class="empty">Nenhum momento ainda. Eles aparecem quando a IA termina de entender os vídeos.</div>`;
+  return `<div class="tgrid">${list.map(({it,m,star,score,fala})=>`<button class="tcard" data-item="${it.id}" data-t="${m.s}"><div class="im" data-th="${it.id}" data-tt="${Math.round(m.s+Math.min(3,(m.e-m.s)/2))}"><span class="badge">${star?"★ "+esc(m.tipo||"sugerido"):fala?"fala":"cena"}</span><span class="tm">${mmss(m.s)}</span></div><div class="tx"><b>${esc(nomeItem(it))}</b><span>${star?"✦ ":""}${esc(m.titulo||"")}${m.titulo&&(m.motivo||m.descricao)?": ":""}${esc(m.motivo||m.descricao||m.text||"")}</span></div></button>`).join("")}</div>`;
+}
+async function hydrateThumbs(){
+  for(const el of $$("#acvBody [data-th], #fabAtual [data-th], #fabEsteira [data-th], #potList [data-th]")){ const id=el.dataset.th; if(!id) continue; await thumbsOf(id); const u=thumbAtSync(id, +el.dataset.tt||0); if(u) el.style.backgroundImage=`url(${u})`; }
+}
+$("#acvTipo").addEventListener("click", e=>{ const b=e.target.closest("[data-tp]"); if(!b) return; acvTipo=b.dataset.tp; acvTitulo=null; PLAT.acervo(); });
+$("#acvModo").addEventListener("click", e=>{ const b=e.target.closest("[data-m]"); if(!b) return; acvModo=b.dataset.m; acvTitulo=null; PLAT.acervo(); });
+let buscaT=null; $("#acvBusca").addEventListener("input", ()=>{ clearTimeout(buscaT); buscaT=setTimeout(()=>PLAT.acervo(), 250); });
+$("#acvBody").addEventListener("click", async e=>{
+  const t=e.target.closest("[data-tit]"), i=e.target.closest("[data-item]");
+  if(e.target.closest("#acvVoltar")){ acvTitulo=null; return PLAT.acervo(); }
+  if(e.target.closest("#acvRenT")){ const tt=TITULOS.find(x=>x.id===acvTitulo); const n=prompt("Nome do título", tt.nome); if(n&&n.trim()){ tt.nome=n.trim(); saveTitulo(tt); PLAT.acervo(); } return; }
+  if(e.target.closest("[data-askai]")) return buscaIA($("#acvBusca").value.trim());
+  if(t){ const its=ITENS.filter(x=>x.tituloId===t.dataset.tit); if(its.length===1) return abrirItem(its[0].id, 0); acvTitulo=t.dataset.tit; return PLAT.acervo(); }
+  if(i) abrirItem(i.dataset.item, +i.dataset.t||0);
+});
+
+/* ---------- busca por momentos ---------- */
+const STOP=new Set("a o e de da do das dos um uma uns umas com sem em no na nos nas que pra para por pelo pela se eu ele ela eles elas voce voces quando onde como mais menos muito muita alguem cena cenas momento momentos video videos tem ter ser esta esse essa isso".split(" "));
+const SIN={
+  chorando:["chora","choro","chorar","lagrima","lagrimas","emocionada","emocionado","triste","choram"], choro:["chorando","chora","lagrima","emocao"],
+  briga:["discussao","discutem","discutindo","brigando","grita","gritando","conflito","tensa","bate-boca"], brigando:["briga","discussao","gritando"],
+  beijo:["beija","beijando","beijam","romantica","casal"], festa:["comemoracao","comemora","comemorando","celebra","danca","dancando","balada"],
+  crianca:["filho","filha","menino","menina","bebe","criancas","garoto","garota","infancia"], birra:["manha","chorando","grita","esperneia","malcriado"],
+  rindo:["risada","ri","gargalhada","engracada","engracado","riem"], risada:["rindo","gargalhada","engracada"], engracado:["engracada","risada","humor","piada","comico"],
+  susto:["assusta","assustado","grito","medo"], medo:["susto","assustada","terror","tensa"], comida:["cozinha","comendo","prato","receita","cozinhando"],
+  cozinha:["comida","cozinhando","receita","prato","chef"], abraco:["abraca","abracam","abracando"], danca:["dancando","dancam","festa","coreografia"],
+  casamento:["noiva","noivo","casar","casando","madrinha","altar"], mae:["maternidade","filho","filha","mamae"], pai:["paternidade","filho","filha","papai"],
+  professor:["professora","escola","aula","sala de aula","aluno"], escola:["professor","aula","aluno","estudante"], amor:["romantica","casal","apaixonado","namoro"],
+  raiva:["brava","bravo","irritada","irritado","grita","briga"], surpresa:["surpreso","surpresa","choque","chocada"], cachorro:["cao","pet","cachorrinho"],
+  viagem:["ferias","aeroporto","aviao","viajando","feriado"], feriado:["ferias","descanso","viagem","folga"], segunda:["segunda-feira","trabalho","acordar","cansaco"]
+};
+function termos(q){ return norm(q).split(/[^\p{L}\p{N}-]+/u).filter(w=>w.length>2&&!STOP.has(w)); }
+function pontuar(txt, termosQ){ const n=norm(txt); let sc=0; termosQ.forEach(([w,peso])=>{ if(n.includes(w)) sc+=peso; }); return sc; }
+function buscarMomentos(q, its){
+  const base=termos(q); if(!base.length) return [];
+  const tq=[]; base.forEach(w=>{ tq.push([w,1]); (SIN[w]||[]).forEach(s=>tq.push([s,0.6])); if(w.endsWith("s")) tq.push([w.slice(0,-1),0.9]); });
+  const res=[];
+  for(const it of its){
+    const cenas=(it.cenas||[]), sug=(it.sugeridos||[]);
+    for(const c of cenas){ const sc=pontuar(c.titulo,tq)*3+pontuar((c.tags||[]).join(" "),tq)*3+pontuar(c.descricao,tq)*2+pontuar((c.tom||[]).join(" "),tq)*2+pontuar((c.pessoas||[]).join(" "),tq)*2+pontuar(c.acao,tq)*2
+      +pontuar((it.cues||[]).filter(x=>x.e>c.s&&x.s<c.e).map(x=>x.text).join(" "),tq)*0.8; if(sc>0) res.push({it, m:c, score:sc}); }
+    for(const c of sug){ const sc=(pontuar(c.titulo,tq)*3+pontuar(c.motivo,tq)*2+pontuar(c.tipo,tq)*2+pontuar(c.tarja,tq))*1.1; if(sc>0) res.push({it, m:c, score:sc, star:true}); }
+    if(!cenas.length){ (it.cues||[]).forEach(c=>{ const sc=pontuar(c.text,tq); if(sc>0) res.push({it, m:{s:c.s,e:c.e,text:c.text}, score:sc, fala:true}); }); }
+  }
+  res.sort((a,b)=>b.score-a.score);
+  const out=[]; for(const r of res){ if(out.some(o=>o.it.id===r.it.id && Math.abs(o.m.s-r.m.s)<10)) continue; out.push(r); if(out.length>=48) break; }
+  return out;
+}
+function renderBusca(q){
+  const its=ITENS.filter(i=>i.marca===MARCA && (!acvTipo || (tituloDe(i)||{}).tipo===acvTipo));
+  if(/\b(decupa|decupagem|preciso de \d+|trechos relevantes)\b/i.test(q)){ $("#acvBody").innerHTML=`<div class="card empty">Decupagem é feita dentro de um título: abra o episódio ou o filme e escreva o pedido no campo de decupagem.</div>`; return; }
+  const r=buscarMomentos(q, its);
+  $("#acvBody").innerHTML=`<div class="sec-h"><h2>${r.length} momento${r.length===1?"":"s"}</h2><span class="small muted">em ${its.length} vídeo${its.length===1?"":"s"} de ${esc(MARCAS[MARCA].nome)} · a IA descreveu cada cena</span><span style="margin-left:auto"></span><button class="btn sm" data-askai>Perguntar à IA</button></div>`+gridMomentos(r)+`<div id="buscaIA"></div>`;
+  hydrateThumbs();
+}
+async function buscaIA(q){
+  const its=ITENS.filter(i=>i.marca===MARCA && i.status==="pronto"); if(!q||!its.length) return;
+  const box=$("#buscaIA"); box.innerHTML=`<p class="status">Procurando com a IA...</p>`;
+  const lista=[]; its.forEach(it=>(it.cenas||[]).forEach((c,k)=>lista.push(`${it.id}#${k} | ${nomeItem(it)} | ${mmss(c.s)}-${mmss(c.e)} | ${c.titulo}: ${c.descricao} [${(c.tom||[]).join(", ")}]`)));
+  try{
+    const {text}=await callClaude({recurso:"Busca no acervo", max_tokens:2000, messages:[{role:"user", content:`Pedido da equipe: "${q}"\n\nCenas do acervo (id | título | tempo | descrição):\n${lista.slice(0,1500).join("\n")}\n\nEscolha até 12 cenas que melhor atendem ao pedido, da melhor pra pior. Responda só com JSON: {"ids":["<id>#<n>", ...], "comentario":"uma frase"}`}]});
+    const js=parseJSON(text); const res=(js.ids||[]).map(x=>{ const [id,k]=String(x).split("#"); const it=its.find(i=>i.id===id); const m=it&&it.cenas[+k]; return m?{it,m}:null; }).filter(Boolean);
+    box.innerHTML=`<div class="sec-h"><h2>Pela IA</h2><span class="small muted">${esc(js.comentario||"")}</span></div>`+gridMomentos(res); hydrateThumbs();
+  }catch(e){ box.innerHTML=`<p class="status">Não deu: ${esc(e.message)}</p>`; }
+}
+
+/* ---------- subir no acervo ---------- */
+let fila=[];
+$("#acvSubir").addEventListener("click", async ()=>{
+  const got=await escolherVideos(); if(!got.length) return;
+  fila=got; renderIngest();
+});
+function renderIngest(){
+  const box=$("#acvIngest"); box.hidden=!fila.length; if(!fila.length) return;
+  const ts=TITULOS.filter(t=>t.marca===MARCA).sort((a,b)=>a.nome.localeCompare(b.nome));
+  box.innerHTML=`<div class="head" style="align-items:center"><div><h2>Subir no acervo de ${esc(MARCAS[MARCA].nome)}</h2><p class="sub">${fila.length} arquivo${fila.length>1?"s":""}: ${esc(fila.map(f=>f.file.name).join(", "))}. O arquivo fica no seu computador; o Estúdio lê direto dele.</p></div><button class="btn sm ghost" id="ingCancel">Cancelar</button></div>
+    <div class="grid3" style="margin-top:12px">
+      <label class="f">Título<select id="ingTit"><option value="">A IA identifica pelo nome e pelas falas</option>${ts.map(t=>`<option value="${t.id}">${esc(t.nome)}</option>`).join("")}<option value="__novo">+ Novo título</option></select></label>
+      <label class="f" id="ingNovoW" hidden>Nome do novo título<input type="text" id="ingNovo"></label>
+      <label class="f">Tipo<select id="ingTipo"><option value="programa">Programa</option><option value="filme">Filme</option><option value="serie">Série</option></select></label>
+      <label class="f">Episódio${fila.length>1?" (o primeiro; os outros seguem a ordem)":""}<input type="text" id="ingEp" placeholder="ex.: 3"></label>
+    </div>
+    <div class="row" style="margin-top:12px;gap:16px">
+      <label class="row" style="gap:8px"><input type="checkbox" id="ingImg" checked> a IA olha as imagens das cenas (acha pela imagem; custa mais)</label>
+      <label class="row" style="gap:8px"><input type="checkbox" id="ingIA" checked> entender as cenas e sugerir momentos</label>
+    </div>
+    <div class="row" style="margin-top:14px"><button class="btn primary" id="ingGo">Subir e processar</button><span class="small muted">Deixe esta aba aberta. Dá pra continuar usando o Estúdio enquanto processa.</span></div>
+    <div id="ingProg" style="margin-top:14px"></div>`;
+}
+$("#acvIngest").addEventListener("change", e=>{ if(e.target.id==="ingTit") $("#ingNovoW").hidden=e.target.value!=="__novo"; });
+$("#acvIngest").addEventListener("click", async e=>{
+  if(e.target.id==="ingCancel"){ fila=[]; renderIngest(); return; }
+  if(e.target.id!=="ingGo") return;
+  let tid=$("#ingTit").value, tipo=$("#ingTipo").value;
+  if(tid==="__novo"){ const n=$("#ingNovo").value.trim(); if(!n) return toast("Dê um nome ao título"); const t={id:nid("t"), marca:MARCA, nome:n, tipo, criadoEm:new Date().toISOString()}; TITULOS.push(t); await saveTitulo(t); tid=t.id; }
+  const ep0=$("#ingEp").value.trim(), img=$("#ingImg").checked, ia=$("#ingIA").checked;
+  const novos=[];
+  for(let k=0;k<fila.length;k++){ const {file,handle}=fila[k];
+    const it={id:nid("a"), marca:MARCA, tituloId:tid||null, tipoSugerido:tipo, ep: ep0? String((+ep0||0)+k || ep0) : "", fileName:file.name, size:file.size, status:"processando", etapa:"na fila", cues:[], cenas:[], sugeridos:[], marcacoes:[], usados:[], decup:[], criadoEm:new Date().toISOString(), opts:{img, ia}};
+    FILES["a:"+it.id]=file; if(handle) await idb.set("handles","a:"+it.id, handle).catch(()=>{});
+    ITENS.push(it); await saveItem(it); novos.push(it);
+  }
+  fila=[]; renderIngest(); PLAT.acervo(); toast("Processando no acervo. Pode seguir usando o Estúdio.");
+  for(const it of novos) await processarItem(it);
+});
+function progItem(it, msg){ it.etapa=msg; const n=$("#topNotice"); notice(`Acervo · ${nomeItem(it)}: ${msg}`, ""); if(view==="acervo") PLAT.acervo(); if(view==="item" && itemAtual===it.id) $("#itSub").textContent=subItem(it); }
+
+async function processarItem(it){
+  try{
+    const file=await fileDoItem(it, true); if(!file) throw new Error("o arquivo não está acessível. Suba de novo.");
+    progItem(it,"lendo o arquivo"); const M=await mbLoad();
+    const input=new M.Input({source:new M.BlobSource(file), formats:M.ALL_FORMATS});
+    it.dur=await input.computeDuration(); const vt=await input.getPrimaryVideoTrack();
+    const ats=await input.getAudioTracks(); let at=ats.find(a=>/^(por|pt)/i.test(a.languageCode||"")) || await input.getPrimaryAudioTrack();
+    it.faixa=at?((at.languageCode&&at.languageCode!=="und")?at.languageCode:"faixa principal")+(ats.length>1?` (de ${ats.length} faixas)`:""):"sem áudio";
+    if(vt){ it.w=vt.displayWidth; it.h=vt.displayHeight; }
+    await saveItem(it);
+    // miniaturas
+    if(vt){ progItem(it,"miniaturas"); const sink=new M.CanvasSink(vt,{width:320, fit:"contain", poolSize:2}); const times=[]; for(let t=0;t<it.dur;t+=THUMB_STEP) times.push(t); const list=[];
+      for await (const w of sink.canvasesAtTimestamps(times)){ list.push(w?w.canvas.toDataURL("image/jpeg",0.6):""); if(list.length%40===0) progItem(it,`miniaturas ${Math.round(list.length/times.length*100)}%`); }
+      THUMBS[it.id]={step:THUMB_STEP, list}; await idb.set("thumbs", it.id, THUMBS[it.id]).catch(()=>{});
+    }
+    // transcrição
+    if(at && !NO_AI){
+      progItem(it,"preparando a transcrição"); await loadAsr(m=>progItem(it,m));
+      const sink=new M.AudioBufferSink(at); const W=240; let words=[];
+      for(let a=0;a<it.dur;a+=W-1){ const b=Math.min(it.dur,a+W); progItem(it,`transcrevendo ${mmss(a)} de ${mmss(it.dur)}`);
+        const chunks=[]; let rate=48000, t0=null;
+        for await (const {buffer,timestamp} of sink.buffers(a,b)){ if(t0==null) t0=timestamp; rate=buffer.sampleRate; const L=buffer.getChannelData(0), R=buffer.numberOfChannels>1?buffer.getChannelData(1):L; const mm=new Float32Array(L.length); for(let i=0;i<L.length;i++) mm[i]=(L[i]+R[i])/2; chunks.push(mm); }
+        if(!chunks.length) continue; const pcm=await resample16k(chunks, rate); const off=t0==null?a:t0;
+        let ws=null; try{ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:"word", chunk_length_s:30, stride_length_s:5}); ws=(out.chunks||[]).filter(c=>c.timestamp&&c.timestamp[0]!=null).map(c=>({text:c.text, s:off+c.timestamp[0], e:off+(c.timestamp[1]!=null?c.timestamp[1]:c.timestamp[0]+0.3)})); }
+        catch(err){ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:true, chunk_length_s:30, stride_length_s:5}); ws=[]; (out.chunks||[]).forEach(c=>{ const s0=off+(c.timestamp[0]||0), e0=off+(c.timestamp[1]!=null?c.timestamp[1]:(c.timestamp[0]||0)+4); const tk=String(c.text||"").trim().split(/\s+/).filter(Boolean); tk.forEach((w,i)=>ws.push({text:w, s:s0+(e0-s0)*i/tk.length, e:s0+(e0-s0)*(i+1)/tk.length})); }); }
+        const lastE=words.length?words[words.length-1].e:-1; words=words.concat(ws.filter(w=>w.s>=lastE-0.05));
+        if(b>=it.dur) break;
+      }
+      const chave=it.tituloId?"t:"+it.tituloId:"m:"+it.marca;
+      it.cues=wordsToCues(words).map(c=>({s:+c.s.toFixed(2), e:+c.e.toFixed(2), text:aplicarGlossario(c.text, chave, it.marca)}));
+      await saveItem(it);
+    }
+    // a IA entende as cenas
+    if(it.opts && it.opts.ia && lsGet("apiKey","")) await entenderItem(it);
+    it.status="pronto"; it.etapa=""; await saveItem(it); notice("");
+    toast(`${nomeItem(it)} entrou no acervo: ${(it.cenas||[]).length} cenas e ${(it.sugeridos||[]).length} momentos sugeridos`);
+  }catch(e){ console.error(e); it.status="erro"; it.etapa=e.message||String(e); await saveItem(it); notice(`Acervo · ${nomeItem(it)}: ${it.etapa}`,"bad"); }
+  if(view==="acervo") PLAT.acervo(); if(view==="item"&&itemAtual===it.id) PLAT.item();
+}
+const linhaCue = c => `[${mmss(c.s)}] ${c.text}`;
+async function entenderItem(it){
+  const BL=720, blocks=[]; for(let a=0;a<(it.dur||0);a+=BL) blocks.push([a,Math.min(it.dur,a+BL)]);
+  if(!blocks.length) return;
+  const T=THUMBS[it.id]||await thumbsOf(it.id), tit=tituloDe(it), mk=it.marca;
+  const tom=mk==="gnt"?"Tom geral do GNT: afetuoso, próximo, coloquial, com humor leve.":tomMarca(mk).join(" ");
+  it.cenas=[]; it.sugeridos=[];
+  for(let bi=0;bi<blocks.length;bi++){ const [a,b]=blocks[bi]; progItem(it,`a IA está entendendo as cenas (${bi+1} de ${blocks.length})`);
+    const linhas=(it.cues||[]).filter(c=>c.s>=a-0.01&&c.s<b).map(linhaCue).join("\n")||"(sem fala neste bloco)";
+    const content=[];
+    const ident = bi===0 && !tit;
+    content.push({type:"text", text:`Você indexa o acervo de vídeo da conta ${MARCAS[mk].nome} para a equipe de redes sociais.
+Título: ${tit?tit.nome:"(desconhecido)"}${it.ep?" · episódio "+it.ep:""}. Arquivo: ${it.fileName}. Duração total: ${mmss(it.dur)}.
+Este bloco vai de ${mmss(a)} a ${mmss(b)}.
+${tom}
+
+TRANSCRIÇÃO DO BLOCO (tempo em que cada fala começa):
+${linhas}
+${it.opts&&it.opts.img?"\nIMAGENS: frames do bloco, na ordem, cada um precedido do tempo exato.":""}
+
+TAREFAS
+1. "cenas": divida o bloco em cenas de 15 a 90 s, cobrindo o bloco inteiro, sem sobreposição. Em cada uma: s e e (mm:ss), titulo curto, descricao (o que acontece e o que se vê: pessoas, ação, lugar, objetos, expressão), tom (lista com termos entre: ${TONS.join(", ")}), pessoas (nome só se for dito na fala ou estiver escrito na imagem; senão descreva, ex.: "mulher de cabelo cacheado"), acao, tags (6 a 10 palavras de busca, com sinônimos).
+2. "sugeridos": de 1 a 4 momentos com potencial de post, entre 8 e 59 s, começando e terminando em fala completa. Em cada um: s, e, tipo (reação engraçada, emoção forte, frase marcante, polêmica ou fofura), titulo, motivo (por que funciona nas redes), tarja (até 11 palavras, no tom da marca).
+${ident?`3. "identificacao": {"titulo","tipo" (programa, filme ou serie),"episodio","confianca" (0 a 1)}, a partir do nome do arquivo e das falas.`:""}
+Não invente fatos que não estejam na fala ou na imagem. Não use travessão.
+Responda só com JSON: {"cenas":[...],"sugeridos":[...]${ident?',"identificacao":{...}':""}}`});
+    if(it.opts&&it.opts.img && T.list.length){ for(let t=a;t<b;t+=THUMB_STEP*4){ const u=T.list[Math.round(t/THUMB_STEP)]; if(!u) continue; content.push({type:"text", text:`[${mmss(t)}]`}); content.push({type:"image", source:{type:"base64", media_type:"image/jpeg", data:u.split(",")[1]}}); } }
+    try{
+      const {text}=await callClaude({recurso:"Acervo: entender cenas", marca:mk, max_tokens:12000, messages:[{role:"user", content}]});
+      const js=parseJSON(text);
+      (js.cenas||[]).forEach(c=>{ const s=parseT(c.s), e=parseT(c.e); if(isNaN(s)||isNaN(e)||e<=s) return; it.cenas.push({id:nid("c"), s, e, titulo:String(c.titulo||""), descricao:String(c.descricao||""), tom:[].concat(c.tom||[]).map(String), pessoas:[].concat(c.pessoas||[]).map(String), acao:String(c.acao||""), tags:[].concat(c.tags||[]).map(String)}); });
+      (js.sugeridos||[]).forEach(c=>{ let s=parseT(c.s), e=parseT(c.e); if(isNaN(s)||isNaN(e)||e<=s) return; [s,e]=encaixar(it,s,e); it.sugeridos.push({id:nid("s"), s, e, tipo:String(c.tipo||""), titulo:String(c.titulo||""), motivo:String(c.motivo||""), tarja:String(c.tarja||"")}); });
+      if(ident && js.identificacao && js.identificacao.titulo){ const idt=js.identificacao; const nomeT=String(idt.titulo).trim(); let t=TITULOS.find(x=>x.marca===mk && norm(x.nome)===norm(nomeT)); if(!t){ t={id:nid("t"), marca:mk, nome:nomeT, tipo:["programa","filme","serie"].includes(idt.tipo)?idt.tipo:(it.tipoSugerido||"programa"), criadoEm:new Date().toISOString(), auto:true}; TITULOS.push(t); await saveTitulo(t); } it.tituloId=t.id; if(!it.ep && idt.episodio) it.ep=String(idt.episodio); }
+      if(bi===0 && !it.resumo && it.cenas.length) it.resumo=it.cenas.slice(0,3).map(c=>c.titulo).join(" · ");
+      await saveItem(it);
+    }catch(e){ if(e.code==="nokey") break; console.warn("bloco", bi, e); progItem(it,"um bloco falhou na IA: "+e.message); }
+  }
+}
+/* corte começa no início de uma fala e termina no fim de uma fala */
+function encaixar(it, s, e){
+  const cs=it.cues||[]; if(!cs.length) return [s,e];
+  const ini=cs.filter(c=>c.s<=s+0.6).pop(); const fim=cs.find(c=>c.e>=e-0.6);
+  let s2=ini&&s-ini.s<4?ini.s:s, e2=fim&&fim.e-e<4?fim.e:e; if(e2<=s2) e2=s2+Math.max(3,e-s);
+  return [+s2.toFixed(2), +e2.toFixed(2)];
+}
+
+/* ---------- item: player, marcação, decupagem ---------- */
+const itv=$("#itVideo"); let itIn=null, itOutT=null, itTab="marc", decupAtual=null;
+function subItem(it){ const t=tituloDe(it); return [t?TIPOS_T[t.tipo]&&TIPOS_T[t.tipo].replace(/s$/,""):"", mmss(it.dur), it.faixa?"áudio: "+it.faixa:"", it.status==="processando"?"processando: "+(it.etapa||""):it.status==="erro"?"erro: "+it.etapa:`${(it.cenas||[]).length} cenas · ${(it.sugeridos||[]).length} sugeridos`].filter(Boolean).join(" · "); }
+async function abrirItem(id, t){ itemAtual=id; go("item"); const it=ITENS.find(i=>i.id===id); if(it && t) { const seekTo=()=>{ itv.currentTime=t; }; if(itv.readyState>=1) seekTo(); else itv.addEventListener("loadedmetadata", seekTo, {once:true}); } }
+PLAT.item = async ()=>{
+  const it=ITENS.find(i=>i.id===itemAtual); if(!it) return go("acervo");
+  $("#itEyebrow").textContent="Acervo · "+MARCAS[it.marca].nome; $("#itTitulo").textContent=nomeItem(it); $("#itSub").textContent=subItem(it);
+  const f=await fileDoItem(it,false);
+  if(f){ $("#itNeedFile").hidden=true; const u=URL.createObjectURL(f); if(itv.dataset.for!==it.id){ if(itv.src) URL.revokeObjectURL(itv.src); itv.src=u; itv.dataset.for=it.id; } }
+  else { $("#itNeedFile").hidden=false; $("#itNeedFile").innerHTML=`Pra tocar, o navegador precisa do arquivo <b>${esc(it.fileName)}</b> de novo. <button class="btn sm" id="itReopen">Abrir o arquivo</button>`; }
+  if(it.status==="erro"){ $("#itNeedFile").hidden=false; $("#itNeedFile").innerHTML+=`${f?"":"<br>"}O processamento parou: ${esc(it.etapa||"")}. <button class="btn sm" id="itReproc">Processar de novo</button>`; }
+  renderTl(); renderItSide(); renderDecup();
+};
+$("#itNeedFile").addEventListener("click", async e=>{ if(e.target.id==="itReproc"){ const it=ITENS.find(i=>i.id===itemAtual); it.status="processando"; it.opts=it.opts||{img:true, ia:true}; await saveItem(it); PLAT.item(); return processarItem(it); } if(e.target.id!=="itReopen") return; const it=ITENS.find(i=>i.id===itemAtual); let f=await fileDoItem(it,true); if(!f){ const got=await escolherVideos(); if(got[0]){ f=FILES["a:"+it.id]=got[0].file; if(got[0].handle) await idb.set("handles","a:"+it.id,got[0].handle).catch(()=>{}); } } if(f) PLAT.item(); });
+function renderTl(){
+  const it=ITENS.find(i=>i.id===itemAtual); if(!it) return; const D=it.dur||itv.duration||1, pct=t=>clamp(t/D*100,0,100);
+  const mk=(c,cl,title)=>`<span class="mk ${cl}" style="left:${pct(c.s)}%;width:${Math.max(0.3,pct(c.e)-pct(c.s))}%" title="${esc(title||"")}"></span>`;
+  $("#itTlMarks").innerHTML=(it.sugeridos||[]).map(c=>mk(c,"sug",c.titulo)).join("")+(it.usados||[]).map(c=>mk(c,"used","já usado")).join("")+(it.marcacoes||[]).map(c=>mk(c,"",c.nome)).join("")+(decupAtual?decupAtual.trechos.map(c=>mk(c,"sel",c.titulo)).join(""):"")+(itIn!=null&&itOutT!=null?mk({s:itIn,e:itOutT},"sel","seleção"):"");
+}
+function tlHead(){ const it=ITENS.find(i=>i.id===itemAtual); if(!it||view!=="item") return; const D=it.dur||itv.duration||1; $("#itTlHead").style.left=clamp(itv.currentTime/D*100,0,100)+"%"; $("#itTime").textContent=fmtT(itv.currentTime)+(itIn!=null?`  ·  entrada ${fmtT(itIn)}`:"")+(itOutT!=null?`  ·  saída ${fmtT(itOutT)}`:""); }
+itv.addEventListener("timeupdate", tlHead); itv.addEventListener("seeked", tlHead);
+$("#itTl").addEventListener("click", e=>{ const it=ITENS.find(i=>i.id===itemAtual); const r=$("#itTl").getBoundingClientRect(); itv.currentTime=clamp((e.clientX-r.left)/r.width,0,1)*(it.dur||itv.duration||0); });
+$("#v-item").addEventListener("click", e=>{ const b=e.target.closest("[data-step]"); if(b) itv.currentTime=clamp(itv.currentTime+ +b.dataset.step,0,itv.duration||1e9); });
+$("#itIn").addEventListener("click", ()=>{ itIn=+itv.currentTime.toFixed(2); if(itOutT!=null&&itOutT<=itIn) itOutT=null; renderTl(); tlHead(); });
+$("#itOut").addEventListener("click", ()=>{ itOutT=+itv.currentTime.toFixed(2); if(itIn!=null&&itOutT<=itIn) return toast("A saída precisa ser depois da entrada"); renderTl(); tlHead(); });
+$("#itMarcar").addEventListener("click", async ()=>{ const it=ITENS.find(i=>i.id===itemAtual); if(itIn==null||itOutT==null) return toast("Marque a entrada e a saída"); const [s,e]=encaixar(it,itIn,itOutT); it.marcacoes.push({id:nid("m"), s, e, nome:$("#itNome").value.trim()||`Trecho ${mmss(s)}`, criadoEm:new Date().toISOString()}); await saveItem(it); itIn=itOutT=null; $("#itNome").value=""; itTab="marc"; renderTl(); renderItSide(); tlHead(); toast("Trecho marcado. Mande pra produção quando quiser."); });
+$("#itTabs").addEventListener("click", e=>{ const b=e.target.closest("[data-t]"); if(!b) return; itTab=b.dataset.t; renderItSide(); });
+function renderItSide(){
+  const it=ITENS.find(i=>i.id===itemAtual); if(!it) return; $$("#itTabs [data-t]").forEach(b=>b.setAttribute("aria-pressed", b.dataset.t===itTab));
+  const row=(c,btns)=>`<div class="item"><div class="top"><button class="linkbtn mono small" data-go-t="${c.s}" style="color:var(--accent-2)">${mmss(c.s)}–${mmss(c.e)}</button><b>${esc(c.nome||c.titulo||"")}</b><span class="small muted">${Math.round(c.e-c.s)} s</span><span style="margin-left:auto"></span>${btns||""}</div>${c.motivo||c.descricao?`<span class="small muted">${esc(c.motivo||c.descricao)}</span>`:""}${c.tom&&c.tom.length?`<div class="tags">${c.tom.map(t=>`<span class="tag">${esc(t)}</span>`).join("")}</div>`:""}</div>`;
+  let h="";
+  if(itTab==="marc") h=(it.marcacoes.length?`<div class="list">${it.marcacoes.map(c=>row(c,`<button class="btn sm primary" data-job="${c.id}">Virar job</button><button class="btn sm ghost" data-mdel="${c.id}">tirar</button>`)).join("")}</div>`:`<div class="empty">Marque entrada e saída no player, dê um nome e clique em Marcar trecho. A timeline mostra em verde o que já foi usado.</div>`)
+    +(it.marcacoes.length>1?`<div class="row" style="margin-top:10px"><button class="btn sm" id="jobTodos">Mandar todos pra produção (1 job)</button></div>`:"");
+  if(itTab==="mom") h=`<div class="list">${(it.sugeridos||[]).map(c=>row(Object.assign({},c,{titulo:"★ "+c.titulo}),`<button class="btn sm" data-marcsug="${c.id}">Marcar</button>`)).join("")}${(it.cenas||[]).map(c=>row(c)).join("")}</div>`||`<div class="empty">Sem cenas ainda.</div>`;
+  if(itTab==="trans") h=it.cues.length?`<input type="search" id="itTransQ" placeholder="Buscar na transcrição" style="width:100%;margin-bottom:10px"><div class="trans" id="itTrans">${it.cues.map(c=>`<p><span data-go-t="${c.s}">${mmss(c.s)}</span>${esc(c.text)}</p>`).join("")}</div>`:`<div class="empty">Sem transcrição.</div>`;
+  $("#itSide").innerHTML=h;
+}
+$("#itSide").addEventListener("input", e=>{ if(e.target.id!=="itTransQ") return; const q=norm(e.target.value); $$("#itTrans p").forEach(p=>p.hidden=!!q && !norm(p.textContent).includes(q)); });
+$("#itSide").addEventListener("click", async e=>{
+  const it=ITENS.find(i=>i.id===itemAtual); const g=e.target.closest("[data-go-t]"); if(g){ itv.currentTime=+g.dataset.goT; itv.play().catch(()=>{}); return; }
+  const d=e.target.closest("[data-mdel]"); if(d){ it.marcacoes=it.marcacoes.filter(m=>m.id!==d.dataset.mdel); await saveItem(it); renderItSide(); renderTl(); return; }
+  const sg=e.target.closest("[data-marcsug]"); if(sg){ const c=it.sugeridos.find(x=>x.id===sg.dataset.marcsug); it.marcacoes.push({id:nid("m"), s:c.s, e:c.e, nome:c.titulo, tarja:c.tarja, criadoEm:new Date().toISOString()}); await saveItem(it); toast("Marcado"); renderTl(); return; }
+  const j=e.target.closest("[data-job]"); if(j){ const c=it.marcacoes.find(x=>x.id===j.dataset.job); return mandarPraProducao(it,[c],{nome:c.nome, tarja:c.tarja}); }
+  if(e.target.id==="jobTodos") return mandarPraProducao(it, it.marcacoes, {nome:nomeItem(it)+" · "+it.marcacoes.length+" trechos"});
+});
+$("#itEditar").addEventListener("click", async ()=>{
+  const it=ITENS.find(i=>i.id===itemAtual); if(!it) return; const t=tituloDe(it);
+  const nome=prompt("Título", t?t.nome:""); if(nome==null) return; const ep=prompt("Episódio (deixe vazio se for filme)", it.ep||""); if(ep==null) return;
+  let tt=TITULOS.find(x=>x.marca===it.marca && norm(x.nome)===norm(nome)); if(!tt && nome.trim()){ tt={id:nid("t"), marca:it.marca, nome:nome.trim(), tipo:t?t.tipo:(it.tipoSugerido||"programa"), criadoEm:new Date().toISOString()}; TITULOS.push(tt); await saveTitulo(tt); }
+  it.tituloId=tt?tt.id:null; it.ep=ep.trim(); await saveItem(it); PLAT.item();
+});
+
+/* decupagem por pedido */
+$("#itPedir").addEventListener("click", decupar);
+$("#itPedido").addEventListener("keydown", e=>{ if(e.key==="Enter") decupar(); });
+async function decupar(){
+  const it=ITENS.find(i=>i.id===itemAtual); const q=$("#itPedido").value.trim(); if(!it||!q) return;
+  if(!/\b(trecho|trechos|decupa|decupagem|cortes?|preciso|separe|selecion)/i.test(q)){
+    const r=buscarMomentos(q,[it]); decupAtual={pedido:q, local:true, trechos:r.map(x=>({s:x.m.s, e:x.m.e, titulo:x.m.titulo||x.m.text||"", descricao:x.m.descricao||x.m.motivo||""}))}; renderDecup(); renderTl(); return;
+  }
+  if(!it.cues.length) return toast("Esse vídeo ainda não tem transcrição");
+  $("#itDecup").innerHTML=`<p class="status">Decupando: lendo a transcrição inteira e as cenas...</p>`;
+  const t=tituloDe(it), mk=it.marca, tom=mk==="gnt"?(PROGRAMAS[progDeTitulo(t)]?PROGRAMAS[progDeTitulo(t)].tom.join(" "):"Tom do GNT: afetuoso, próximo, humor leve."):tomMarca(mk).join(" ");
+  try{
+    const {text}=await callClaude({recurso:"Decupagem", marca:mk, max_tokens:8000, messages:[{role:"user", content:`Você é editor de cortes da conta ${MARCAS[mk].nome}. Título: ${t?t.nome:it.fileName}${it.ep?" · ep "+it.ep:""}.
+${tom}
+
+PEDIDO DA EQUIPE: "${q}"
+
+TRANSCRIÇÃO COMPLETA (tempo em que cada fala começa):
+${it.cues.map(linhaCue).join("\n")}
+
+CENAS JÁ MAPEADAS:
+${(it.cenas||[]).map(c=>`${mmss(c.s)}-${mmss(c.e)} ${c.titulo} [${(c.tom||[]).join(", ")}]`).join("\n")||"(nenhuma)"}
+
+JÁ USADOS (evite repetir): ${(it.usados||[]).map(u=>mmss(u.s)+"-"+mmss(u.e)).join(", ")||"nenhum"}
+
+REGRAS
+- Cada trecho entre 8 e 59 s, a não ser que o pedido diga outra duração.
+- Começa no início de uma fala e termina no fim de uma fala, sem cortar palavra.
+- Ordem cronológica. Não invente nada que não esteja na fala. Não use travessão.
+- Em cada trecho: s, e (mm:ss), titulo (curto, como a equipe chamaria), descricao (o que acontece), motivo (por que vale post), tarja (até 11 palavras, no tom da marca).
+Responda só com JSON: {"trechos":[{"s":"","e":"","titulo":"","descricao":"","motivo":"","tarja":""}]}`}]});
+    const js=parseJSON(text);
+    const trechos=(js.trechos||[]).map(x=>{ let s=parseT(x.s), e=parseT(x.e); if(isNaN(s)||isNaN(e)||e<=s) return null; [s,e]=encaixar(it,s,e); return {s,e,titulo:String(x.titulo||""),descricao:String(x.descricao||""),motivo:String(x.motivo||""),tarja:String(x.tarja||"")}; }).filter(Boolean);
+    decupAtual={pedido:q, trechos, em:new Date().toISOString()}; it.decup=(it.decup||[]).concat([decupAtual]).slice(-10); await saveItem(it);
+    renderDecup(); renderTl();
+  }catch(e){ $("#itDecup").innerHTML=`<p class="status">Não deu pra decupar: ${esc(e.message)}</p>`; }
+}
+function renderDecup(){
+  const box=$("#itDecup"); if(!decupAtual||!decupAtual.trechos){ box.innerHTML=""; return; }
+  const ts=decupAtual.trechos;
+  box.innerHTML=`<div class="card" style="width:100%;padding:14px"><div class="head" style="align-items:center"><div><b>${decupAtual.local?"Busca":"Decupagem"}:</b> <span class="small muted">“${esc(decupAtual.pedido)}” · ${ts.length} trecho${ts.length===1?"":"s"}</span></div><div class="row">${ts.length?`<button class="btn sm" id="dcTodos">Marcar todos</button>`:""}<button class="btn sm ghost" id="dcFechar">×</button></div></div>
+    <div class="list" style="margin-top:10px">${ts.map((c,i)=>`<div class="drow"><span class="n">${i+1}</span><button class="linkbtn mono small tc" data-dgo="${i}" style="color:var(--accent-2);text-align:left">${mmss(c.s)}–${mmss(c.e)} · ${Math.round(c.e-c.s)} s</button><div><b>${esc(c.titulo)}</b><small>${esc(c.descricao)}</small>${c.motivo?`<small>✦ ${esc(c.motivo)}</small>`:""}</div><button class="btn sm" data-dmarc="${i}">⚑ Marcar</button></div>`).join("")||`<div class="empty">Nada encontrado.</div>`}</div></div>`;
+}
+$("#itDecup").addEventListener("click", async e=>{
+  const it=ITENS.find(i=>i.id===itemAtual); if(e.target.id==="dcFechar"){ decupAtual=null; renderDecup(); renderTl(); return; }
+  const g=e.target.closest("[data-dgo]"); if(g){ itv.currentTime=decupAtual.trechos[+g.dataset.dgo].s; itv.play().catch(()=>{}); return; }
+  const add=c=>{ if(!it.marcacoes.some(m=>Math.abs(m.s-c.s)<0.5)) it.marcacoes.push({id:nid("m"), s:c.s, e:c.e, nome:c.titulo, tarja:c.tarja, criadoEm:new Date().toISOString()}); };
+  const m=e.target.closest("[data-dmarc]"); if(m){ add(decupAtual.trechos[+m.dataset.dmarc]); await saveItem(it); itTab="marc"; renderItSide(); renderTl(); toast("Marcado"); return; }
+  if(e.target.id==="dcTodos"){ decupAtual.trechos.forEach(add); await saveItem(it); itTab="marc"; renderItSide(); renderTl(); toast("Todos marcados"); }
+});
+
+/* ---------- do acervo pra produção ---------- */
+function progDeTitulo(t){ if(!t) return ""; return ORDER.find(k=>norm(PROGRAMAS[k].nome).replace(/[?,]/g,"")===norm(t.nome).replace(/[?,]/g,"")) || ""; }
+async function mandarPraProducao(it, trechos, o={}){
+  const f=await fileDoItem(it,true); if(!f) return toast("Abra o arquivo do vídeo primeiro (botão no topo)");
+  if(it.marca!==MARCA){ MARCA=it.marca; lsSet("marca",MARCA); renderBrandSw(); }
+  go("novo");
+  const t=tituloDe(it), pg=it.marca==="gnt"?progDeTitulo(t):(t?"t:"+t.id:"");
+  if([...$("#progSel").options].some(x=>x.value===pg)) $("#progSel").value=pg;
+  $("#epIn").value=it.ep||"";
+  renderRows(trechos.map(c=>({a:showT(c.s), b:showT(c.e)})));
+  if(o.tarja!=null) $("#tarjaIn").value=o.tarja||"";
+  if(o.fmt && formatosDe(MARCA).includes(o.fmt)){ $("#fmtSel").value=o.fmt; fmtSelChanged(); }
+  const h=await idb.get("handles","a:"+it.id).catch(()=>null);
+  draft.file=f; draft.handle=h||null; draft.origem={tipo:"acervo", itemId:it.id, ideiaId:o.ideiaId||null};
+  $("#brutoName").textContent=f.name+" · do acervo"; $("#dropBruto").classList.add("has");
+  titleTouched=!!o.nome; if(o.nome) $("#tituloIn").value=o.nome; else autoTitle();
+  refreshDraft(); toast("Preenchido a partir do acervo. Confira e clique em Criar job e processar.");
+}
+function marcarUsado(j){
+  const o=j.origem; if(!o) return;
+  if(o.itemId){ const it=ITENS.find(i=>i.id===o.itemId); if(it){ segsOf(j).concat(j.segB?[j.segB]:[]).forEach(s=>it.usados.push({s:s.in,e:s.out,jobId:j.id})); saveItem(it); } }
+  if(o.ideiaId && typeof IDEIAS==="object"){ const id=IDEIAS.find(x=>x.id===o.ideiaId); if(id){ id.status="job"; id.jobId=j.id; saveIdeia(id); } }
+  if(j.trello) j.marca=j.marca||MARCA;
+}
+/* ================================================================
+   FÁBRICA DE MEMES + POTENCIAL
+   aperta um botão, chega uma ideia pronta, no formato da marca,
+   com trecho do acervo, o porquê e as fontes.
+   ================================================================ */
+let IDEIAS=[]; let fabAtual=null, fabGerando=false;
+const TONS_FAB=["Engraçado","Alegre","Emocional","Nostálgico","Fofo","Irônico leve","Romântico"];
+const fabDir={tom:new Set(), fmt:"", titulo:"", pessoa:"", noticia:"", tema:""};
+const saveIdeia = x => idb.set("ideias", x.id, JSON.parse(JSON.stringify(x))).catch(()=>{});
+function esteiraDe(m){ return IDEIAS.filter(x=>x.marca===m && x.status==="esteira").sort((a,b)=>(a.criadoEm||"").localeCompare(b.criadoEm||"")); }
+function dirCount(){ return fabDir.tom.size+["fmt","titulo","pessoa","noticia","tema"].filter(k=>fabDir[k]).length; }
+
+PLAT.fabrica = ()=>{
+  const m=MARCA, M=MARCAS[m];
+  $("#fabEyebrow").textContent="Linha de produção · "+M.nome;
+  $("#fabSub").textContent=`O acervo de ${M.nome} + o que está em alta hoje, já no formato da marca.`;
+  $("#fabTom").innerHTML=TONS_FAB.map(t=>`<button class="chip" data-tom="${t}" aria-pressed="${fabDir.tom.has(t)}">${t}</button>`).join("");
+  $("#fabFmt").innerHTML=`<option value="">Todos os formatos</option>`+formatosDe(m).map(f=>`<option value="${f}" ${fabDir.fmt===f?"selected":""}>${fmtNome(f)}</option>`).join("");
+  const ts=TITULOS.filter(t=>t.marca===m); const progs=m==="gnt"?ORDER.map(k=>PROGRAMAS[k].nome):[];
+  const nomes=[...new Set(ts.map(t=>t.nome).concat(progs))].sort();
+  $("#fabTitulo").innerHTML=`<option value="">Qualquer título</option>`+nomes.map(n=>`<option ${fabDir.titulo===n?"selected":""}>${esc(n)}</option>`).join("");
+  $("#fabPessoa").value=fabDir.pessoa; $("#fabNoticia").value=fabDir.noticia; $("#fabTema").value=fabDir.tema;
+  $("#fabDirN").textContent=dirCount()||"";
+  $("#fabCal").innerHTML=proximasDatas(10,1).slice(0,6).map(d=>`<span><b>${esc(d.nome)}</b> · ${esc(d.quando)}</span>`).join("");
+  const nItens=ITENS.filter(i=>i.marca===m && i.status==="pronto").length;
+  if(!fabAtual || fabAtual.marca!==m) fabAtual=IDEIAS.filter(x=>x.marca===m && x.status==="atual").pop()||null;
+  $("#fabStatus").innerHTML = !lsGet("apiKey","") ? `A Fábrica usa a IA da plataforma. Cole a chave em <button class="linkbtn" style="color:var(--accent-2)" data-go="config">Configurações</button>.`
+    : !nItens ? `O acervo de ${esc(M.nome)} ainda está vazio: as ideias saem sem trecho pronto. Suba vídeos em <button class="linkbtn" style="color:var(--accent-2)" data-go="acervo">Acervo</button> pra cada ideia já vir com a cena certa.` : "";
+  renderFabAtual(); renderEsteira();
+};
+$("#fabDirToggle").addEventListener("click", ()=>{ $("#fabDir").hidden=!$("#fabDir").hidden; });
+$("#fabTom").addEventListener("click", e=>{ const b=e.target.closest("[data-tom]"); if(!b) return; const t=b.dataset.tom; fabDir.tom.has(t)?fabDir.tom.delete(t):fabDir.tom.add(t); b.setAttribute("aria-pressed", fabDir.tom.has(t)); $("#fabDirN").textContent=dirCount()||""; });
+["fabFmt:fmt","fabTitulo:titulo","fabPessoa:pessoa","fabNoticia:noticia","fabTema:tema"].forEach(p=>{ const [id,k]=p.split(":"); $("#"+id).addEventListener("input", e=>{ fabDir[k]=e.target.value.trim(); $("#fabDirN").textContent=dirCount()||""; }); });
+$("#fabLimpar").addEventListener("click", ()=>{ fabDir.tom.clear(); ["fmt","titulo","pessoa","noticia","tema"].forEach(k=>fabDir[k]=""); PLAT.fabrica(); });
+$("#fabGo").addEventListener("click", async ()=>{
+  if(fabGerando) return;
+  const est=esteiraDe(MARCA);
+  if(est.length && !dirCount()){ promover(est[0]); if(est.length<3) gerarLote(false); return; }
+  await gerarLote(true);
+});
+function promover(x){ IDEIAS.filter(i=>i.marca===x.marca&&i.status==="atual").forEach(i=>{ i.status="vista"; saveIdeia(i); }); x.status="atual"; saveIdeia(x); fabAtual=x; renderFabAtual(); renderEsteira(); window.scrollTo({top:0,behavior:"smooth"}); }
+
+function contextoAcervo(m){
+  const its=ITENS.filter(i=>i.marca===m && i.status==="pronto" && (!fabDir.titulo || norm(nomeItem(i)).includes(norm(fabDir.titulo))));
+  const linhas=[];
+  its.forEach(it=>{ (it.sugeridos||[]).forEach(s=>linhas.push(`${it.id}|${mmss(s.s)}-${mmss(s.e)}|${nomeItem(it)}|★ ${s.tipo}: ${s.titulo}. ${s.motivo}`)); (it.cenas||[]).forEach(c=>linhas.push(`${it.id}|${mmss(c.s)}-${mmss(c.e)}|${nomeItem(it)}|${c.titulo}: ${c.descricao} [${(c.tom||[]).join(", ")}]`)); });
+  const usados=IDEIAS.filter(x=>x.marca===m && x.momento).map(x=>x.momento.itemId+"@"+Math.round(x.momento.s));
+  return {linhas:linhas.slice(0,900), usados};
+}
+async function gerarLote(mostrar){
+  const m=MARCA, M=MARCAS[m]; fabGerando=true; $("#fabGo").disabled=true;
+  $("#fabStatus").textContent = mostrar ? "A máquina está pensando: olhando o calendário, o que está em alta e o acervo..." : "";
+  try{
+    const {linhas, usados}=contextoAcervo(m), hoje=new Date();
+    const tom = m==="gnt" ? "GNT: afetuoso, próximo, coloquial, humor leve, frases de identificação. Programas: "+ORDER.map(k=>PROGRAMAS[k].nome+" ("+PROGRAMAS[k].tom.slice(0,2).join(" ")+")").join("; ") : tomMarca(m).join(" ");
+    const recentes=IDEIAS.filter(x=>x.marca===m).slice(-25).map(x=>"- "+x.titulo).join("\n")||"(nenhuma)";
+    const dir=[fabDir.tom.size?"Tom: "+[...fabDir.tom].join(", "):"", fabDir.fmt?"Formato: "+fmtNome(fabDir.fmt):"", fabDir.titulo?"Conteúdo do acervo: "+fabDir.titulo:"", fabDir.pessoa?"Ator ou apresentador: "+fabDir.pessoa:"", fabDir.noticia?"Notícia ou acontecimento: "+fabDir.noticia:"", fabDir.tema?"Tema: "+fabDir.tema:""].filter(Boolean);
+    const web=$("#fabWeb").checked;
+    const prompt=`Você é a Fábrica de Memes da conta ${M.nome} (social media). Hoje é ${hoje.toLocaleDateString("pt-BR",{weekday:"long",day:"2-digit",month:"long",year:"numeric"})}.
+
+TOM DA MARCA
+${tom}
+
+FORMATOS DISPONÍVEIS: ${formatosDe(m).map(fmtNome).join(", ")}
+Regra da legenda do vídeo: ${regraDe(m).label}.
+
+CALENDÁRIO (datas próximas)
+${proximasDatas(12,2).map(d=>`- ${d.data}: ${d.nome} (${d.quando})`).join("\n")}
+
+${dir.length?"DIRECIONAMENTO DA EQUIPE (siga à risca)\n"+dir.map(x=>"- "+x).join("\n"):"SEM DIRECIONAMENTO: escolha você o assunto do dia (data, tendência ou comportamento do momento)."}
+
+ACERVO DISPONÍVEL (id|tempo|título|descrição). Use SÓ momentos daqui como trecho:
+${linhas.length?linhas.join("\n"):"(acervo vazio: proponha a ideia sem trecho, deixando momento como null)"}
+
+JÁ USADOS (evite): ${usados.join(", ")||"nenhum"}
+IDEIAS RECENTES (não repita):
+${recentes}
+
+${web?"Use a busca na web pra checar o que está em alta hoje no Brasil (séries, novelas, filmes, memes, notícias leves) que combine com o acervo. ":""}Gere 4 ideias de post diferentes entre si. Cada ideia junta um gancho do dia (data, tendência, notícia ou comportamento) com um momento do acervo que encaixa nele.
+
+Para cada ideia:
+- titulo: curto, como a equipe chamaria
+- formato: um dos formatos disponíveis
+- tarja: texto da tarja no tom da marca (até 14 palavras; na Tela dividida use "texto de cima | texto de baixo")
+- legenda: legenda do post, 110 a 135 caracteres, 1 emoji
+- porque_agora: 1 ou 2 frases explicando o gancho de hoje
+- tom: uma palavra
+- momento: {"id":"<id do acervo>","s":"mm:ss","e":"mm:ss"} entre 8 e 59 s, ou null
+- fontes: [{"titulo","url"}] das páginas que embasaram o gancho (vazio se não houver)
+Não invente fatos sobre pessoas reais. Não use travessão.
+Responda só com JSON: {"ideias":[...]}`;
+    const tools = web ? [{type:"web_search_20250305", name:"web_search", max_uses:4, user_location:{type:"approximate", country:"BR", timezone:"America/Sao_Paulo"}}] : undefined;
+    let res;
+    try{ res=await callClaude({recurso:"Fábrica de Memes", marca:m, max_tokens:10000, tools, messages:[{role:"user", content:prompt}]}); }
+    catch(e){ if(web && (e.status===400||/web_search|tool/i.test(e.apiMsg||""))){ res=await callClaude({recurso:"Fábrica de Memes", marca:m, max_tokens:10000, messages:[{role:"user", content:prompt.replace("Use a busca na web","Sem acesso à web agora; use o calendário e o que você sabe. Ignore a instrução de busca:")}]}); toast("A busca na web não está liberada na sua conta da API. Gerei sem ela."); } else throw e; }
+    const js=parseJSON(res.text);
+    // fontes da busca, se a IA não listou
+    const cit=[]; (res.data.content||[]).forEach(b=>{ if(b.type==="web_search_tool_result" && Array.isArray(b.content)) b.content.forEach(r=>{ if(r.url) cit.push({titulo:r.title||r.url, url:r.url}); }); });
+    const novas=(js.ideias||[]).map(x=>{
+      let mo=null; if(x.momento && x.momento.id){ const it=ITENS.find(i=>i.id===x.momento.id); let s=parseT(x.momento.s), e=parseT(x.momento.e); if(it && !isNaN(s) && !isNaN(e) && e>s){ [s,e]=encaixar(it,s,e); mo={itemId:it.id, s, e, nome:nomeItem(it)}; } }
+      const fontes=(Array.isArray(x.fontes)?x.fontes:[]).filter(f=>f&&f.url).map(f=>({titulo:String(f.titulo||f.url), url:String(f.url)}));
+      return {id:nid("i"), marca:m, status:"esteira", criadoEm:new Date().toISOString(), titulo:String(x.titulo||"Ideia"), formato:formatosDe(m).includes(x.formato)?x.formato:(formatosDe(m).find(f=>fmtNome(f)===x.formato)||formatosDe(m)[0]), tarja:String(x.tarja||""), legenda:clean(x.legenda), porque:String(x.porque_agora||""), tom:String(x.tom||""), momento:mo, fontes:fontes.length?fontes:cit.slice(0,3), dir:dir};
+    });
+    if(!novas.length) throw new Error("a IA não devolveu ideias. Tente de novo.");
+    IDEIAS.push(...novas); for(const x of novas) await saveIdeia(x);
+    if(mostrar) promover(novas[0]);
+    $("#fabStatus").textContent=""; renderEsteira();
+  }catch(e){ $("#fabStatus").textContent="Não deu pra gerar: "+(e.message||e); if(e.code==="nokey") go("config"); }
+  fabGerando=false; $("#fabGo").disabled=false;
+}
+function previewIdeia(x, w){
+  const mo=x.momento; const tt=mo?Math.round(mo.s+Math.min(2,(mo.e-mo.s)/2)):0;
+  return `<div class="pv916" ${w?`style="width:${w}px"`:""} data-th="${mo?mo.itemId:""}" data-tt="${tt}">${mo?"":`<div class="noimg">sem trecho do acervo</div>`}${pvTarjaHTML(x.marca, x.formato, x.tarja, "")}</div>`;
+}
+function renderFabAtual(){
+  const x=fabAtual, box=$("#fabAtual"); if(!x){ box.innerHTML=""; return; }
+  const mo=x.momento;
+  box.innerHTML=`<div class="card"><div class="idea">${previewIdeia(x)}
+    <div><div class="tags" style="margin-bottom:8px"><span class="tag">${esc(fmtNome(x.formato))}</span>${x.tom?`<span class="tag">${esc(x.tom)}</span>`:""}${x.status==="potencial"?`<span class="tag star">no Potencial</span>`:""}</div>
+      <h2>${esc(x.titulo)}</h2>
+      <div class="q">“${esc(x.tarja)}”</div>
+      <p class="why"><b>Por que agora:</b> ${esc(x.porque)}</p>
+      ${mo?`<p class="why"><b>Trecho:</b> <button class="linkbtn" style="color:var(--accent-2)" data-abrir="${x.id}">${esc(mo.nome)} · ${mmss(mo.s)}–${mmss(mo.e)} ▶</button></p>`:`<p class="why"><b>Trecho:</b> nenhum no acervo ainda.</p>`}
+      ${x.legenda?`<p class="why"><b>Legenda:</b> ${esc(x.legenda)}</p>`:""}
+      ${x.fontes&&x.fontes.length?`<div class="srcs">${x.fontes.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">↗ ${esc(f.titulo)}</a>`).join("")}</div>`:""}
+      <div class="row" style="margin-top:14px"><button class="btn primary" data-pot="${x.id}">✓ Pro Potencial</button><button class="btn" data-ed="${x.id}" ${mo?"":"disabled"}>Mandar pro editor</button><button class="btn ghost" data-desc="${x.id}">✕ Descartar</button></div>
+    </div></div></div>`;
+  hydrateThumbs();
+}
+function renderEsteira(){
+  const est=esteiraDe(MARCA); $("#fabEsteiraCard").hidden=!est.length;
+  $("#fabEsteira").innerHTML=est.map(x=>`<button class="est" data-prom="${x.id}">${previewIdeia(x)}<b>${esc(x.titulo)}</b><span class="small muted">${esc(fmtNome(x.formato))}</span></button>`).join("");
+  hydrateThumbs();
+}
+$("#fabEsteira").addEventListener("click", e=>{ const b=e.target.closest("[data-prom]"); if(b) promover(IDEIAS.find(x=>x.id===b.dataset.prom)); });
+async function acaoIdeia(e){
+  const g=k=>e.target.closest("[data-"+k+"]"); const id=(g("pot")||g("ed")||g("desc")||g("abrir")||g("arq")||{}).dataset; if(!id) return;
+  const x=IDEIAS.find(i=>i.id===(id.pot||id.ed||id.desc||id.abrir||id.arq)); if(!x) return;
+  if(id.pot){ x.status="potencial"; x.aprovadaEm=new Date().toISOString(); await saveIdeia(x); toast("Foi pro Potencial"); atualizarPotN(); const nx=esteiraDe(x.marca)[0]; if(nx && view==="fabrica") promover(nx); else if(view==="fabrica") renderFabAtual(); if(esteiraDe(x.marca).length<2) gerarLote(false); }
+  if(id.desc){ x.status="descartada"; await saveIdeia(x); const nx=esteiraDe(x.marca)[0]; if(view==="fabrica"){ if(nx) promover(nx); else { fabAtual=null; renderFabAtual(); } } else PLAT.potencial(); }
+  if(id.arq){ x.status="arquivada"; await saveIdeia(x); atualizarPotN(); PLAT.potencial(); }
+  if(id.abrir && x.momento) abrirItem(x.momento.itemId, x.momento.s);
+  if(id.ed && x.momento){ const it=ITENS.find(i=>i.id===x.momento.itemId); if(!it) return toast("O vídeo dessa ideia saiu do acervo"); mandarPraProducao(it,[{s:x.momento.s,e:x.momento.e}],{nome:x.titulo, tarja:x.tarja, fmt:x.formato, ideiaId:x.id}); }
+}
+$("#fabAtual").addEventListener("click", acaoIdeia);
+
+/* ---------- potencial ---------- */
+function atualizarPotN(){ $("#potN").textContent=IDEIAS.filter(x=>x.marca===MARCA&&x.status==="potencial").length||""; }
+PLAT.potencial = ()=>{
+  $("#potEyebrow").textContent="Ideias aprovadas · "+MARCAS[MARCA].nome; atualizarPotN();
+  const list=IDEIAS.filter(x=>x.marca===MARCA && (x.status==="potencial"||x.status==="job")).sort((a,b)=>(b.aprovadaEm||"").localeCompare(a.aprovadaEm||""));
+  $("#potList").innerHTML=list.length?list.map(x=>{ const mo=x.momento;
+    return `<div class="card"><div class="idea" style="grid-template-columns:150px minmax(0,1fr)">${previewIdeia(x)}<div>
+      <div class="tags" style="margin-bottom:6px"><span class="tag">${esc(fmtNome(x.formato))}</span>${x.status==="job"?`<span class="tag star">virou job</span>`:""}<span class="small muted">aprovada em ${fmtData(x.aprovadaEm)}</span></div>
+      <h2 style="font-size:19px">${esc(x.titulo)}</h2><div class="q">“${esc(x.tarja)}”</div>
+      <p class="why"><b>Por que agora:</b> ${esc(x.porque)}</p>
+      ${mo?`<p class="why"><b>Trecho:</b> <button class="linkbtn" style="color:var(--accent-2)" data-abrir="${x.id}">${esc(mo.nome)} · ${mmss(mo.s)}–${mmss(mo.e)} ▶</button></p>`:""}
+      ${x.fontes&&x.fontes.length?`<div class="srcs">${x.fontes.map(f=>`<a href="${esc(f.url)}" target="_blank" rel="noopener">↗ ${esc(f.titulo)}</a>`).join("")}</div>`:""}
+      <div class="grid2" style="gap:10px;margin-top:12px"><label class="f">Comentário<input type="text" data-com="${x.id}" value="${esc(x.comentario||"")}" placeholder="Comentar..."></label><label class="f">Entregar pra<input type="text" data-resp="${x.id}" value="${esc(x.resp||"")}" placeholder="nome de quem edita"></label></div>
+      <div class="row" style="margin-top:12px"><button class="btn primary" data-ed="${x.id}" ${mo?"":"disabled"}>Desenvolver no editor</button><button class="btn ghost" data-arq="${x.id}">Arquivar</button></div>
+    </div></div></div>`; }).join(""):`<div class="card empty">Nada no Potencial de ${esc(MARCAS[MARCA].nome)} ainda. Na Fábrica, cada ✓ manda a ideia pra cá.</div>`;
+  hydrateThumbs();
+};
+$("#potList").addEventListener("click", acaoIdeia);
+$("#potList").addEventListener("change", async e=>{ const c=e.target.closest("[data-com]"), r=e.target.closest("[data-resp]"); const x=IDEIAS.find(i=>i.id===((c||r)||{dataset:{}}).dataset[c?"com":"resp"]); if(!x) return; if(c) x.comentario=c.value; if(r) x.resp=r.value; await saveIdeia(x); toast("Salvo"); });
+/* ================================================================
+   ATENDIMENTO (painel do Trello dentro da plataforma) + início
+   ================================================================ */
+let atdPronto=false; const atdEspera={};
+PLAT.atendimento = ()=>{ const f=$("#atdFrame"); if(!f.src) f.src="atendimento.html?embed=1&marca="+MARCA; };
+function atdPost(msg){ const f=$("#atdFrame"); if(!f.src) f.src="atendimento.html?embed=1&marca="+MARCA; const send=()=>f.contentWindow.postMessage(msg, location.origin); if(atdPronto) send(); else f.addEventListener("load", ()=>setTimeout(send,400), {once:true}); }
+window.addEventListener("message", e=>{
+  if(e.origin!==location.origin) return; const d=e.data||{};
+  if(d.type==="atd:pronto"){ atdPronto=true; }
+  if(d.type==="atd:marca" && MARCAS[d.marca] && d.marca!==MARCA){ MARCA=d.marca; lsSet("marca",MARCA); renderBrandSw(); atualizarPotN(); }
+  if(d.type==="atd:card" && d.card) cardPraNovo(d);
+  if(d.type==="atd:comentado"){ const j=JOBS.find(x=>x.id===d.jobId); if(j){ if(d.ok){ j.trello.avisado=true; saveJob(j); toast("Comentário publicado no card do Trello"); notice(""); } else toast("O Trello não aceitou: "+(d.erro||"erro")); } }
+});
+function cardPraNovo(d){
+  const c=d.card; if(d.marca && MARCAS[d.marca] && d.marca!==MARCA){ MARCA=d.marca; lsSet("marca",MARCA); renderBrandSw(); }
+  go("novo");
+  $("#briefing").value=[c.name, c.desc].filter(Boolean).join("\n\n"); const det=$("#briefing").closest("details"); if(det) det.open=true;
+  readBriefing();
+  draft.trello={id:c.id, url:c.url||("https://trello.com/c/"+c.id), nome:c.name};
+  if(c.due) $("#prazoIn").value=String(c.due).slice(0,10);
+  if(!$("#tituloIn").value || /^Job/.test($("#tituloIn").value)){ $("#tituloIn").value=c.name; titleTouched=true; }
+  toast("Card do Trello no Novo post. Confira os campos e escolha o bruto (ou mande pelo acervo).");
+}
+function mostrarAvisoTrello(j){
+  notice("");
+  const n=$("#topNotice"); n.hidden=false; n.className="notice";
+  n.innerHTML=`“${esc(j.titulo)}” foi aprovado. Quer avisar no card do Trello? <button class="btn sm" id="avisarTrello">Comentar no card</button> <button class="btn sm ghost" id="naoAvisar">Agora não</button>`;
+  $("#avisarTrello").onclick=()=>{ atdPost({type:"estudio:comentar", jobId:j.id, cardId:j.trello.id, texto:`✅ Aprovado no Estúdio: ${j.titulo} (${(j.outs||[]).join(", ")}).`}); n.innerHTML="Enviando pro Trello... (se pedir senha, entre no Atendimento uma vez)"; };
+  $("#naoAvisar").onclick=()=>notice("");
+}
+/* leitura do briefing também acha títulos de Globoplay e Telecine */
+function acharTituloNoTexto(t){ const low=norm(t); return TITULOS.filter(x=>x.marca===MARCA).sort((a,b)=>b.nome.length-a.nome.length).find(x=>low.includes(norm(x.nome))); }
+
+/* ---------- início da plataforma ---------- */
+(async()=>{
+  try{
+    TITULOS=(await idb.all("titulos").catch(()=>[]))||[];
+    ITENS=(await idb.all("acervo").catch(()=>[]))||[];
+    IDEIAS=(await idb.all("ideias").catch(()=>[]))||[];
+    GLOSS=await idb.get("kv","gloss").catch(()=>null)||{};
+    USO=await idb.get("kv","uso").catch(()=>null)||[];
+    let mud=false; ITENS.forEach(it=>{ if(it.status==="processando"){ it.status="erro"; it.etapa="interrompido (a aba foi fechada ou recarregada)"; mud=true; saveItem(it); } });
+    await loadKitMarcas();
+  }catch(e){ console.error(e); }
+  renderBrandSw(); atualizarPotN(); renderNovo(); renderPainel();
+  const ini=new URLSearchParams(location.search).get("v"); if(ini && $("#v-"+ini)) go(ini);
+  if(new URLSearchParams(location.search).get("card")==="1"){ try{ const d=JSON.parse(localStorage.getItem("estudio:card")||"null"); localStorage.removeItem("estudio:card"); if(d&&d.card) cardPraNovo(d); }catch(e){} }
 })();
 </script>
 </body>
