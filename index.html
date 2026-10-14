@@ -621,9 +621,12 @@ a.btn{text-decoration:none;color:inherit;display:inline-block}
       <div class="card">
         <h2>Transcrição</h2>
         <p class="sub">Roda no seu computador. Na primeira vez baixa o modelo (uma vez só).</p>
-        <label class="f" style="margin-top:12px">Qualidade<select id="asrModel">
+        <label class="f" style="margin-top:12px">No editor (o corte)<select id="asrModel">
           <option value="onnx-community/whisper-large-v3-turbo_timestamped">Máxima (recomendada, ~1,6 GB na 1ª vez)</option>
           <option value="onnx-community/whisper-small_timestamped">Rápida (~400 MB na 1ª vez)</option></select></label>
+        <label class="f" style="margin-top:10px">No acervo (episódio inteiro)<select id="asrAcervo">
+          <option value="onnx-community/whisper-small_timestamped">Rápida (recomendada: ~5 min pra 47 min de vídeo)</option>
+          <option value="onnx-community/whisper-large-v3-turbo_timestamped">Máxima (bem mais lenta no episódio inteiro)</option></select></label>
       </div>
       <div class="card">
         <h2>Kit GNT</h2>
@@ -1220,10 +1223,7 @@ function ensureWorklet(){
   workletReady=actx.audioWorklet.addModule(url).catch(e=>{ workletReady=null; throw e; });
   return workletReady;
 }
-async function loadAsr(onMsg){
-  const model = settings.asrModel;
-  if(NO_AI) return null;
-  if(asr && asrName===model) return asr;
+async function criarAsr(model, onMsg){
   let T, lastErr;
   for(const u of TJS_URLS){ try{ T = await import(u); break; }catch(e){ lastErr=e; } }
   if(!T) throw lastErr || new Error("biblioteca de transcrição indisponível");
@@ -1238,10 +1238,24 @@ async function loadAsr(onMsg){
   if(device==="webgpu") tries.push([model, {encoder_model: big ? (f16?"fp16":"q4") : "fp32", decoder_model_merged:"q4"}, "webgpu"]);
   if(big) tries.push([FALLBACK_ASR, device==="webgpu"?{encoder_model:"fp32", decoder_model_merged:"q4"}:"q8", device]);
   tries.push([big?FALLBACK_ASR:model, "q8", "wasm"]);
-  let err=null; asr=null;
-  for(const [m,dtype,dev] of tries){ try{ asr = await T.pipeline("automatic-speech-recognition", m, {device:dev, dtype, progress_callback}); asrUsed=m; break; }catch(e){ err=e; console.warn("asr", m, dev, e); } }
-  if(!asr) throw err || new Error("transcrição indisponível");
-  asrName = model; return asr;
+  let err=null;
+  for(const [m,dtype,dev] of tries){ try{ const p = await T.pipeline("automatic-speech-recognition", m, {device:dev, dtype, progress_callback}); return {p, used:m}; }catch(e){ err=e; console.warn("asr", m, dev, e); } }
+  throw err || new Error("transcrição indisponível");
+}
+async function loadAsr(onMsg){
+  const model = settings.asrModel;
+  if(NO_AI) return null;
+  if(asr && asrName===model) return asr;
+  const r=await criarAsr(model, onMsg); asr=r.p; asrUsed=r.used; asrName=model; return asr;
+}
+/* acervo: transcreve o episódio inteiro, então usa o modelo rápido (≈8x mais rápido que o tempo do vídeo);
+   o modelo máximo fica pro corte final no editor */
+let asrAcv=null, asrAcvName=null;
+async function loadAsrAcervo(onMsg){
+  const model = settings.asrAcervo || FALLBACK_ASR;
+  if(model===settings.asrModel) return loadAsr(onMsg);
+  if(asrAcv && asrAcvName===model) return asrAcv;
+  const r=await criarAsr(model, onMsg); asrAcv=r.p; asrAcvName=model; return asrAcv;
 }
 async function resample16k(chunks, rate){
   const len = chunks.reduce((a,c)=>a+c.length,0);
@@ -2344,13 +2358,14 @@ $("#tomDetail").addEventListener("click", async e=>{
 
 /* ---------- configurações ---------- */
 function renderConfig(){
-  $("#apiKey").value=lsGet("apiKey",""); $("#apiModel").value=settings.apiModel; $("#asrModel").value=settings.asrModel; $("#handleIn").value=settings.handle;
+  $("#apiKey").value=lsGet("apiKey",""); $("#apiModel").value=settings.apiModel; $("#asrModel").value=settings.asrModel; $("#asrAcervo").value=settings.asrAcervo||FALLBACK_ASR; $("#handleIn").value=settings.handle;
   renderKit();
 }
 async function saveSettings(){ await idb.set("kv","settings",Object.assign({},settings)); }
 $("#apiKey").addEventListener("change", e=>{ lsSet("apiKey", e.target.value.trim()); toast("Chave salva neste navegador"); });
 $("#apiModel").addEventListener("change", e=>{ lsSet("apiModel", e.target.value.trim()||"claude-sonnet-5-5"); settings.apiModel=e.target.value.trim()||"claude-sonnet-5-5"; saveSettings(); });
 $("#asrModel").addEventListener("change", e=>{ settings.asrModel=e.target.value; saveSettings(); });
+$("#asrAcervo").addEventListener("change", e=>{ settings.asrAcervo=e.target.value; saveSettings(); });
 $("#handleIn").addEventListener("change", e=>{ const v=parseFloat(e.target.value.replace(",",".")); settings.handle=isNaN(v)?5:clamp(v,0,30); saveSettings(); });
 
 /* kit GNT: fontes e bugs ficam só neste navegador (não vão pro site público) */
@@ -2784,23 +2799,22 @@ async function processarItem(it){
       if(direto){ try{ const sink=new M.CanvasSink(vt,{width:320, fit:"contain", poolSize:2});
           for await (const w of sink.canvasesAtTimestamps(times)){ list.push(w?w.canvas.toDataURL("image/jpeg",0.6):""); if(list.length%40===0) progItem(it,`miniaturas ${Math.round(list.length/times.length*100)}%`); } }
         catch(err){ console.warn("miniaturas direto", err); direto=false; } }
-      if(!direto){ list=await thumbsPeloPlayer(file, times, p=>progItem(it,`miniaturas pelo player ${Math.round(p*100)}%`)); }
+      if(!direto){ const t2=times.filter((t,i)=>i%2===0); const l2=await thumbsPeloPlayer(file, t2, p=>progItem(it,`miniaturas ${Math.round(p*100)}%`)); list=times.map((t,i)=>l2[Math.floor(i/2)]||""); }
       THUMBS[it.id]={step:THUMB_STEP, list}; await idb.set("thumbs", it.id, THUMBS[it.id]).catch(()=>{});
     }
     // transcrição
     if(at && !NO_AI){
-      progItem(it,"preparando a transcrição"); await loadAsr(m=>progItem(it,m));
-      let audDireto = await at.canDecode().catch(()=>false); const sink=audDireto?new M.AudioBufferSink(at):null; const W=240; let words=[];
-      for(let a=0;a<it.dur;a+=W-1){ const b=Math.min(it.dur,a+W); progItem(it,`transcrevendo ${mmss(a)} de ${mmss(it.dur)}${audDireto?"":" (áudio pelo player, em tempo real)"}`);
-        let chunks=[], rate=48000, t0=null;
-        if(audDireto){ try{ for await (const {buffer,timestamp} of sink.buffers(a,b)){ if(t0==null) t0=timestamp; rate=buffer.sampleRate; const L=buffer.getChannelData(0), R=buffer.numberOfChannels>1?buffer.getChannelData(1):L; const mm=new Float32Array(L.length); for(let i=0;i<L.length;i++) mm[i]=(L[i]+R[i])/2; chunks.push(mm); } }
-          catch(err){ console.warn("áudio direto", err); audDireto=false; chunks=[]; t0=null; } }
-        if(!audDireto){ const r=await audioPeloPlayer(file, a, b); chunks=r.chunks; rate=r.rate; t0=a; }
-        if(!chunks.length) continue; const pcm=await resample16k(chunks, rate); const off=t0==null?a:t0;
-        let ws=null; try{ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:"word", chunk_length_s:30, stride_length_s:5}); ws=(out.chunks||[]).filter(c=>c.timestamp&&c.timestamp[0]!=null).map(c=>({text:c.text, s:off+c.timestamp[0], e:off+(c.timestamp[1]!=null?c.timestamp[1]:c.timestamp[0]+0.3)})); }
-        catch(err){ const out=await asr(pcm,{language:"portuguese", task:"transcribe", return_timestamps:true, chunk_length_s:30, stride_length_s:5}); ws=[]; (out.chunks||[]).forEach(c=>{ const s0=off+(c.timestamp[0]||0), e0=off+(c.timestamp[1]!=null?c.timestamp[1]:(c.timestamp[0]||0)+4); const tk=String(c.text||"").trim().split(/\s+/).filter(Boolean); tk.forEach((w,i)=>ws.push({text:w, s:s0+(e0-s0)*i/tk.length, e:s0+(e0-s0)*(i+1)/tk.length})); }); }
+      progItem(it,"preparando a transcrição"); const asrA=await loadAsrAcervo(m=>progItem(it,m));
+      const leitor=await leitorDeAudio(M, at); let tA=performance.now(), feito=0;
+      const W=240; let words=[];
+      for(let a=0;a<it.dur;a+=W-1){ const b=Math.min(it.dur,a+W);
+        const eta = feito>0 ? Math.max(0,Math.round((performance.now()-tA)/feito*(it.dur-a)/60000)) : null;
+        progItem(it,`transcrevendo ${mmss(a)} de ${mmss(it.dur)}${eta!=null?` · faltam ~${eta||1} min`:""}`);
+        const r=await leitor(a,b); if(!r||!r.pcm||!r.pcm.length){ feito+=b-a; if(b>=it.dur) break; continue; }
+        const pcm=r.pcm, off=r.t0;
+        let ws=null; { const out=await asrA(pcm,{language:"portuguese", task:"transcribe", return_timestamps:true, chunk_length_s:30, stride_length_s:5}); ws=[]; (out.chunks||[]).forEach(c=>{ const s0=off+(c.timestamp[0]||0), e0=off+(c.timestamp[1]!=null?c.timestamp[1]:(c.timestamp[0]||0)+4); const tk=String(c.text||"").trim().split(/\s+/).filter(Boolean); tk.forEach((w,i)=>ws.push({text:w, s:s0+(e0-s0)*i/tk.length, e:s0+(e0-s0)*(i+1)/tk.length})); }); }
         const lastE=words.length?words[words.length-1].e:-1; words=words.concat(ws.filter(w=>w.s>=lastE-0.05));
-        if(b>=it.dur) break;
+        feito+=b-a; if(b>=it.dur) break;
       }
       const chave=it.tituloId?"t:"+it.tituloId:"m:"+it.marca;
       it.cues=wordsToCues(words).map(c=>({s:+c.s.toFixed(2), e:+c.e.toFixed(2), text:aplicarGlossario(c.text, chave, it.marca)}));
@@ -2813,6 +2827,33 @@ async function processarItem(it){
   }catch(e){ console.error(e); it.status="erro"; it.etapa=e.message||String(e); await saveItem(it); notice(`Acervo · ${nomeItem(it)}: ${it.etapa}`,"bad"); }
   if(view==="acervo") PLAT.acervo(); if(view==="item"&&itemAtual===it.id) PLAT.item();
 }
+/* áudio rápido, sem tocar o vídeo:
+   1) AAC (quase todo MP4): empacota em ADTS e o Web Audio decodifica já em 16 kHz (segundos por bloco)
+   2) outros formatos: decodificador direto (WebCodecs) */
+async function leitorDeAudio(M, at){
+  let cfg=null; try{ cfg=await at.getDecoderConfig(); }catch(e){}
+  const aac = cfg && /^mp4a\.40/.test(cfg.codec||"") && cfg.description;
+  if(aac){
+    const d=cfg.description, asc=new Uint8Array(d.buffer?d.buffer:d, d.byteOffset||0, d.byteLength);
+    const prof=(asc[0]>>3)&31, sfi=((asc[0]&7)<<1)|(asc[1]>>7), ch=(asc[1]>>3)&15;
+    if(prof>=1 && prof<=4 && sfi<13 && ch>0){
+      const sink=new M.EncodedPacketSink(at);
+      return async (a,b)=>{
+        const parts=[]; let first=null; let pk=await sink.getPacket(a,{verifyKeyPackets:false}).catch(()=>null) || await sink.getFirstPacket();
+        while(pk && pk.timestamp<b){ if(pk.timestamp+pk.duration>=a){ if(first==null) first=pk.timestamp; const len=pk.data.length+7, h=new Uint8Array(7); h[0]=0xFF; h[1]=0xF1; h[2]=((prof-1)<<6)|(sfi<<2)|(ch>>2); h[3]=((ch&3)<<6)|(len>>11); h[4]=(len>>3)&0xFF; h[5]=((len&7)<<5)|0x1F; h[6]=0xFC; parts.push(h, pk.data); } pk=await sink.getNextPacket(pk); }
+        if(!parts.length) return null;
+        const ab=await new Blob(parts).arrayBuffer(); const buf=await new OfflineAudioContext(1,1,16000).decodeAudioData(ab);
+        const L=buf.getChannelData(0), R=buf.numberOfChannels>1?buf.getChannelData(1):null; let pcm=L; if(R){ pcm=new Float32Array(L.length); for(let i=0;i<L.length;i++) pcm[i]=(L[i]+R[i])/2; }
+        return {pcm, t0:first};
+      };
+    }
+  }
+  if(!(await at.canDecode().catch(()=>false))) throw new Error(`o Chrome não decodifica o áudio deste arquivo (${(cfg&&cfg.codec)||at.codec}). Exporte o bruto com áudio AAC e suba de novo.`);
+  const sink=new M.AudioBufferSink(at);
+  return async (a,b)=>{ const chunks=[]; let rate=48000, t0=null;
+    for await (const {buffer,timestamp} of sink.buffers(a,b)){ if(t0==null) t0=timestamp; rate=buffer.sampleRate; const L=buffer.getChannelData(0), R=buffer.numberOfChannels>1?buffer.getChannelData(1):L; const mm=new Float32Array(L.length); for(let i=0;i<L.length;i++) mm[i]=(L[i]+R[i])/2; chunks.push(mm); }
+    if(!chunks.length) return null; return {pcm:await resample16k(chunks, rate), t0:t0==null?a:t0}; };
+}
 /* plano B: quando o decodificador direto do Chrome recusa o arquivo (ex.: vídeo entrelaçado de TV), usa o player */
 const pvid=document.createElement("video"); pvid.muted=false; pvid.preload="auto"; pvid.playsInline=true; let pSrcNode=null, pFile=null;
 async function pvidLoad(file){ if(pFile===file && pvid.src) return; if(pvid.src) URL.revokeObjectURL(pvid.src); pvid.src=URL.createObjectURL(file); pFile=file; await new Promise((res,rej)=>{ const to=setTimeout(()=>rej(new Error("o Chrome não consegue abrir esse arquivo. Exporte em MP4 (H.264, progressivo) e suba de novo.")),20000); pvid.onloadeddata=()=>{ clearTimeout(to); res(); }; pvid.onerror=()=>{ clearTimeout(to); rej(new Error("o Chrome não consegue abrir esse arquivo. Exporte em MP4 (H.264, progressivo) e suba de novo.")); }; }); }
@@ -2820,17 +2861,6 @@ async function thumbsPeloPlayer(file, times, onp){
   await pvidLoad(file); const c=document.createElement("canvas"); c.width=320; c.height=Math.round(320*(pvid.videoHeight||9)/(pvid.videoWidth||16)); const x=c.getContext("2d"); const list=[];
   for(let i=0;i<times.length;i++){ await new Promise(r=>{ const to=setTimeout(r,4000); pvid.onseeked=()=>{ clearTimeout(to); r(); }; pvid.currentTime=Math.min(times[i], (pvid.duration||1e9)-0.1); }); x.drawImage(pvid,0,0,c.width,c.height); list.push(c.toDataURL("image/jpeg",0.6)); if(i%20===0) onp&&onp(i/times.length); }
   return list;
-}
-async function audioPeloPlayer(file, a, b){
-  await pvidLoad(file); ensureAudio(); await ensureWorklet();
-  if(!pSrcNode){ pSrcNode=actx.createMediaElementSource(pvid); }
-  const node=new AudioWorkletNode(actx,"cap",{numberOfInputs:1,numberOfOutputs:1,outputChannelCount:[1]}), z=actx.createGain(); z.gain.value=0; const chunks=[];
-  node.port.onmessage=e=>chunks.push(e.data); pSrcNode.connect(node); node.connect(z); z.connect(actx.destination);
-  await new Promise(r=>{ pvid.onseeked=r; pvid.currentTime=a; setTimeout(r,4000); });
-  node.port.postMessage(true); await pvid.play().catch(()=>{});
-  await new Promise(r=>{ const tick=()=>{ if(pvid.currentTime>=b-0.02 || pvid.ended || pvid.paused) return r(); requestAnimationFrame(tick); }; tick(); setTimeout(r,(b-a)*1000+15000); });
-  pvid.pause(); node.port.postMessage(false); await sleep(120); pSrcNode.disconnect(node); node.disconnect(); z.disconnect();
-  return {chunks, rate:actx.sampleRate};
 }
 const linhaCue = c => `[${mmss(c.s)}] ${c.text}`;
 async function entenderItem(it){
