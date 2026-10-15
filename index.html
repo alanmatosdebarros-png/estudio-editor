@@ -643,6 +643,16 @@ html[data-tema] input[type=search],html[data-tema] input[type=date],html[data-te
 html[data-tema] textarea{font-family:inherit;font-size:14px;line-height:1.5}
 html[data-tema] #cmDesc{font-family:var(--mono);font-size:12.5px}
 .slgrid{grid-template-columns:repeat(auto-fill,minmax(min(320px,100%),1fr))}
+/* linha do tempo presa no rodapé da Revisão */
+#revBody>.tlx{grid-column:1/-1;position:sticky;bottom:0;z-index:20;margin-top:4px;box-shadow:0 -10px 30px -12px rgba(0,0,0,.25),var(--shadow)}
+#revBody>.stage{top:12px}
+#pv{max-height:calc(100vh - 380px)!important;min-height:260px}
+.tcbox{display:flex;flex-direction:column;align-items:flex-start;gap:1px;font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--faint)}
+html[data-tema] input.tc{font-family:var(--mono);font-size:15px;font-weight:700;background:var(--fg)!important;color:var(--bg);border:0!important;border-radius:8px!important;padding:5px 8px;width:128px;letter-spacing:.02em;cursor:text}
+html[data-tema] .tcbox.bruto input.tc{background:var(--surface-2)!important;color:var(--fg);box-shadow:inset 0 0 0 1px var(--line-2)}
+html[data-tema] input.tc:focus{box-shadow:0 0 0 3px var(--accent-soft)!important;outline:2px solid var(--accent)}
+.tlx.fora .tcbox.bruto input.tc{outline:2px solid #ffc21a}
+@media (max-width:900px){#revBody>.tlx{position:static}}
 
 </style>
 <div class="banner">Estúdio de Conteúdo · <span>os vídeos são lidos direto do seu computador; pra IA vai só texto (falas) e, no acervo, miniaturas das cenas</span></div>
@@ -759,19 +769,6 @@ html[data-tema] #cmDesc{font-family:var(--mono);font-size:12.5px}
           <label class="f" style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" id="pvIgChk"> interface do Instagram</label>
           <span class="mono small muted" id="tNow">00:00.0 / 00:00.0</span>
         </div>
-        <div class="tlx" id="tlx">
-          <div class="tlx-bar">
-            <button class="fbtn" data-fs="-10" title="Volta 10 frames (Shift+←)">«</button><button class="fbtn" data-fs="-1" title="Volta 1 frame (←)">‹</button>
-            <span class="tc" id="tlTc">00:00:00:00</span>
-            <button class="fbtn" data-fs="1" title="Avança 1 frame (→)">›</button><button class="fbtn" data-fs="10" title="Avança 10 frames (Shift+→)">»</button>
-            <span class="small muted mono" id="tlSrc"></span><span class="small muted" id="tlFps"></span>
-            <span style="flex:1"></span>
-            <button class="btn sm" id="tlIn" title="Atalho: I">[ IN neste frame</button><button class="btn sm" id="tlOut" title="Atalho: O">OUT neste frame ]</button>
-            <label class="tlzoom">− <input type="range" id="tlZoom" aria-label="Zoom da linha do tempo"> +</label>
-          </div>
-          <div class="tlx-strip" id="tlStrip"><div class="tlx-track" id="tlTrack"></div><div class="tlx-head" id="tlHead"></div></div>
-          <p class="small muted" id="tlInfo" style="margin:0"></p>
-        </div>
       </div>
       <div style="display:flex;flex-direction:column;gap:16px;min-width:0">
         <div class="card">
@@ -799,7 +796,20 @@ html[data-tema] #cmDesc{font-family:var(--mono);font-size:12.5px}
           <div class="list" id="cueList"></div>
         </div>
       </div>
-    </div>
+      <div class="tlx" id="tlx">
+          <div class="tlx-bar">
+            <button class="fbtn" data-fs="-10" title="Volta 10 frames (Shift+←)">«</button><button class="fbtn" data-fs="-1" title="Volta 1 frame (←)">‹</button>
+            <label class="tcbox"><span>corte</span><input class="tc" id="tlTc" value="00:00:00:00" spellcheck="false" title="Digite o tempo do corte e Enter"></label>
+            <button class="fbtn" data-fs="1" title="Avança 1 frame (→)">›</button><button class="fbtn" data-fs="10" title="Avança 10 frames (Shift+→)">»</button>
+            <label class="tcbox bruto"><span>bruto</span><input class="tc" id="tlSrc" value="00:00:00:00" spellcheck="false" title="Digite o minuto do vídeo bruto e Enter"></label><span class="small muted" id="tlFps"></span>
+            <span style="flex:1"></span>
+            <button class="btn sm" id="tlIn" title="Atalho: I">[ IN neste frame</button><button class="btn sm" id="tlOut" title="Atalho: O">OUT neste frame ]</button>
+            <label class="tlzoom">− <input type="range" id="tlZoom" aria-label="Zoom da linha do tempo"> +</label>
+          </div>
+          <div class="tlx-strip" id="tlStrip"><div class="tlx-track" id="tlTrack"></div><div class="tlx-head" id="tlHead"></div></div>
+          <p class="small muted" id="tlInfo" style="margin:0"></p>
+        </div>
+</div>
   </section>
 
   <!-- ENTREGA -->
@@ -2570,11 +2580,22 @@ $("#genBtn").addEventListener("click", async ()=>{
 });
 
 /* ---------- IA: uma chamada só pra toda a plataforma, com contagem de uso ---------- */
-async function callClaude({system, messages, max_tokens=8000, tools, recurso="Outro", marca=MARCA, model}){
+const EM_ANDAMENTO=new Set();
+async function callClaude(opts){
+  // trava: o mesmo pedido não sai duas vezes ao mesmo tempo (clique duplo pagava em dobro)
+  const chave=opts.recurso+"|"+JSON.stringify(opts.messages).length+"|"+JSON.stringify(opts.messages).slice(-300);
+  if(EM_ANDAMENTO.has(chave)){ const e=new Error("esse pedido já está rodando, aguarde"); e.code="dup"; throw e; }
+  EM_ANDAMENTO.add(chave);
+  try{ return await callClaude1(opts); } finally{ EM_ANDAMENTO.delete(chave); }
+}
+async function callClaude1({system, messages, max_tokens=8000, tools, recurso="Outro", marca=MARCA, model}){
   const key=lsGet("apiKey",""); if(!key){ const e=new Error("Cole a chave da API em Configurações."); e.code="nokey"; throw e; }
   const body={model:model||settings.apiModel||"claude-sonnet-5-5", max_tokens, messages}; if(system) body.system=system; if(tools&&tools.length) body.tools=tools;
-  const r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
-  const raw=await r.text(); let data=null; try{ data=JSON.parse(raw); }catch(e){}
+  // sem "pensamento estendido": a resposta é JSON curto, o raciocínio interno só gastava tokens de saída
+  if(lsGet("semThinking","1")==="1") body.thinking={type:"disabled"};
+  let r=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify(body)});
+  let raw=await r.text(); let data=null; try{ data=JSON.parse(raw); }catch(e){}
+  if(!r.ok && r.status===400 && body.thinking && /thinking/i.test(raw)){ lsSet("semThinking","0"); return callClaude1({system, messages, max_tokens, tools, recurso, marca, model}); }
   if(!r.ok){ const m=data&&data.error&&data.error.message; const e=new Error(r.status===401?"a chave foi recusada (401). Confira se é uma chave de API (começa com sk-ant-api) e se ainda vale.":(m||("a API respondeu com erro "+r.status))); e.status=r.status; e.apiMsg=m||""; throw e; }
   if(!data) throw new Error("a API respondeu algo que não é JSON. Tente de novo.");
   const u=data.usage||{}; registrarUso({marca, recurso, inp:(u.input_tokens||0)+(u.cache_read_input_tokens||0)+(u.cache_creation_input_tokens||0), out:u.output_tokens||0, buscas:(u.server_tool_use&&u.server_tool_use.web_search_requests)||0, model:body.model});
@@ -3312,7 +3333,9 @@ function ajustarDuracao(it, s, e, fx){
   if(e-s>fx.max){ const ok=cs.filter(c=>c.e>s && c.e-s<=fx.max && c.e-s>=fx.min); if(ok.length) e=ok[ok.length-1].e; else e=s+fx.max; }
   return [+s.toFixed(2), +e.toFixed(2)];
 }
-async function decupar(){
+let decupando=false;
+async function decupar(){ if(decupando) return; decupando=true; try{ await decupar1(); } finally{ decupando=false; } }
+async function decupar1(){
   const it=ITENS.find(i=>i.id===itemAtual); const q=$("#itPedido").value.trim(); if(!it||!q) return;
   if(false){
     const r=buscarMomentos(q,[it]); decupAtual={pedido:q, local:true, trechos:r.map(x=>({s:x.m.s, e:x.m.e, titulo:x.m.titulo||x.m.text||"", descricao:x.m.descricao||x.m.motivo||""}))}; renderDecup(); renderTl(); return;
@@ -3324,13 +3347,13 @@ async function decupar(){
   $("#itDecup").innerHTML=`<p class="status">Decupando: lendo a transcrição inteira${fx?` · trechos de ${mmss(fx.min)} a ${mmss(fx.max)}`:""}${qtd?` · ${qtd} trechos`:""}...</p>`;
   const t=tituloDe(it), mk=it.marca, tom=mk==="gnt"?(PROGRAMAS[progDeTitulo(t)]?PROGRAMAS[progDeTitulo(t)].tom.join(" "):"Tom do GNT: afetuoso, próximo, humor leve."):tomMarca(mk).join(" ");
   try{
-    const {text}=await callClaude({recurso:"Decupagem", marca:mk, max_tokens:8000, messages:[{role:"user", content:`Você é editor de cortes da conta ${MARCAS[mk].nome}. Título: ${t?t.nome:it.fileName}${it.ep?" · ep "+it.ep:""}.
+    // a transcrição vai primeiro e fica em cache por alguns minutos: pedir de novo no mesmo episódio custa ~10% da entrada
+    const fixo=`Você é editor de cortes da conta ${MARCAS[mk].nome}. Título: ${t?t.nome:it.fileName}${it.ep?" · ep "+it.ep:""}.
 ${tom}
 
-PEDIDO DA EQUIPE: "${q}"
-
 TRANSCRIÇÃO COMPLETA (tempo em que cada fala começa):
-${it.cues.map(linhaCue).join("\n")}
+${it.cues.map(linhaCue).join("\n")}`;
+    const {text}=await callClaude({recurso:"Decupagem", marca:mk, max_tokens:8000, messages:[{role:"user", content:[{type:"text", text:fixo, cache_control:{type:"ephemeral"}}, {type:"text", text:`PEDIDO DA EQUIPE: "${q}"
 
 CENAS JÁ MAPEADAS:
 ${(it.cenas||[]).map(c=>`${mmss(c.s)}-${mmss(c.e)} ${c.titulo} [${(c.tom||[]).join(", ")}]`).join("\n")||"(nenhuma)"}
@@ -3344,7 +3367,7 @@ ${qtd?`- Entregue exatamente ${qtd} trechos (ou o máximo possível, se o vídeo
 - Começa no início de uma fala e termina no fim de uma fala, sem cortar palavra.
 - Ordem cronológica. Não invente nada que não esteja na fala. Não use travessão.
 - Em cada trecho: s, e (mm:ss), titulo (curto, como a equipe chamaria), descricao (o que acontece), motivo (por que vale post), tarja (até 11 palavras, no tom da marca).
-Responda só com JSON: {"trechos":[{"s":"","e":"","titulo":"","descricao":"","motivo":"","tarja":""}]}`}]});
+Responda só com JSON: {"trechos":[{"s":"","e":"","titulo":"","descricao":"","motivo":"","tarja":""}]}`}]}]});
     const js=parseJSON(text);
     const trechos=(js.trechos||[]).map(x=>{ let s=parseT(x.s), e=parseT(x.e); if(isNaN(s)||isNaN(e)||e<=s) return null; [s,e]=encaixar(it,s,e); if(fx) [s,e]=ajustarDuracao(it,s,e,fx); if(fx && (e-s<fx.min-2 || e-s>fx.max+2)) return null; return {s,e,titulo:String(x.titulo||""),descricao:String(x.descricao||""),motivo:String(x.motivo||""),tarja:String(x.tarja||"")}; }).filter(Boolean);
     if(!trechos.length && (js.trechos||[]).length) toast(fx?`A IA mandou trechos fora de ${mmss(fx.min)} a ${mmss(fx.max)}. Tente de novo.`:"Nenhum trecho válido. Tente de novo.");
@@ -3881,8 +3904,11 @@ function tlSync(){
   if(view!=="revisao"||!cur||!$("#tlHead")) return;
   const x=outPos*tlPps; $("#tlHead").style.left=x+"px";
   const st=$("#tlStrip"); if(previewPlaying && (x<st.scrollLeft||x>st.scrollLeft+st.clientWidth-30)) st.scrollLeft=x-60;
-  $("#tlTc").textContent=tcDe(outPos); $("#tlSrc").textContent="bruto "+tcDe(video.currentTime||0);
+  const fora=srcToOut(cur, video.currentTime||0)==null; $("#tlHead").style.display=fora?"none":"";
+  if(document.activeElement!==$("#tlTc")) $("#tlTc").value=tcDe(outPos); if(document.activeElement!==$("#tlSrc")) $("#tlSrc").value=tcDe(video.currentTime||0);
+  $("#tlx").classList.toggle("fora", fora);
   const sel=tlSel&&segsOf(cur)[tlSel.si];
+  if(fora && !sel){ $("#tlInfo").textContent="Você está no bruto, fora do corte. ← → anda frame a frame aqui. [ IN puxa o começo do trecho seguinte até este frame, OUT ] estica o fim do trecho anterior até ele."; return; }
   $("#tlInfo").textContent = sel ? (tlSel.edge==="in"?`Aparando o IN do Trecho ${tlSel.si+1}: a prévia mostra o primeiro frame do corte`:`Aparando o OUT do Trecho ${tlSel.si+1}: a prévia mostra o último frame do corte`)+` · ← → 1 frame, Shift 10 · Esc solta` : "← → anda 1 frame · Shift+← → anda 10 · Espaço toca e pausa · clique na borda de um trecho pra aparar no frame exato";
 }
 async function tlThumbs(){
@@ -3901,6 +3927,7 @@ async function tlThumbs(){
 async function tlPasso(n){
   if(!cur||!video.src) return; if(previewPlaying) stopPreview(); if(!video.paused) video.pause();
   if(tlSel) return tlApara(n);
+  if(srcToOut(cur, video.currentTime)==null){ await seek(centroDo(frameDe(video.currentTime)+n)); return draw(); }
   const segs=segsOf(cur), {seg}=outToSrc(cur,outPos); let i=Math.max(0,segs.indexOf(seg));
   let f=frameDe(video.currentTime)+n, t=centroDo(f);
   // passou do fim do trecho: pula pro próximo (e vice-versa), como no corte final
@@ -3920,8 +3947,13 @@ async function tlApara(n, abs){
 }
 function tlMarca(edge){
   if(!cur||!video.src) return; if(previewPlaying) stopPreview();
-  const {seg}=outToSrc(cur,outPos), segs=segsOf(cur), si=segs.indexOf(seg); if(si<0) return;
-  const f=frameDe(video.currentTime); tlSel={si, edge};
+  const segs=segsOf(cur), t=video.currentTime, f=frameDe(t); let si;
+  if(srcToOut(cur,t)!=null) si=segs.indexOf(outToSrc(cur,outPos).seg);
+  else { // fora do corte: IN puxa o trecho seguinte, OUT estica o anterior (no tempo do bruto)
+    const cand=segs.map((s,i)=>({s,i})).filter(x=>edge==="in"?x.s.in>t:x.s.out<t).sort((a,b)=>edge==="in"?a.s.in-b.s.in:b.s.out-a.s.out);
+    if(!cand.length) return toast(edge==="in"?"Não tem trecho depois deste ponto do bruto pra puxar o IN":"Não tem trecho antes deste ponto do bruto pra esticar o OUT");
+    si=cand[0].i; }
+  if(si<0) return; tlSel={si, edge};
   tlApara(0, edge==="in"?f:f+1); toast(edge==="in"?`IN do Trecho ${si+1} neste frame (${tcDe(f/tlFps())})`:`OUT do Trecho ${si+1}: este é o último frame (${tcDe(f/tlFps())})`);
 }
 /* eventos */
@@ -3963,6 +3995,26 @@ function pvIgRender(){
 }
 $("#pvIgChk").addEventListener("change", e=>{ lsSet("pvig", e.target.checked?"1":"0"); pvIgRender(); if(e.target.checked&&pvFmt!=="9x16") toast("A interface do Instagram aparece na prévia 9x16"); });
 $("#pvFmt").addEventListener("click", ()=>setTimeout(pvIgRender,0));
+
+/* ir direto pra um tempo: no corte ou no bruto */
+function lerTempo(str){
+  str=String(str||"").trim(); if(!str) return NaN; const fps=tlFps();
+  const p=str.replace(",",".").split(/[:;]/);
+  if(p.length===4){ const [h,m,ss,ff]=p.map(Number); if([h,m,ss,ff].some(isNaN)) return NaN; return h*3600+m*60+ss+ff/fps; }
+  return typeof digitsToT==="function" ? digitsToT(str) : parseT(str);
+}
+async function tlIr(campo){
+  if(!cur||!video.src) return; if(previewPlaying) stopPreview(); tlSel=null;
+  const el=$(campo==="corte"?"#tlTc":"#tlSrc"), t=lerTempo(el.value);
+  if(isNaN(t)) { toast("Tempo inválido. Ex.: 1:23, 1:23.5 ou 00:01:23:12"); return tlSync(); }
+  if(campo==="corte"){ await showAt(clamp(t,0,outDur(cur))); }
+  else { const d=video.duration||1e9; await seek(centroDo(frameDe(clamp(t,0,d-0.05)))); const o=srcToOut(cur,video.currentTime); if(o!=null) outPos=o; draw(); }
+  el.blur(); tlRender();
+  const st=$("#tlStrip"), x=outPos*tlPps; if(x<st.scrollLeft||x>st.scrollLeft+st.clientWidth-30) st.scrollLeft=x-st.clientWidth/2;
+}
+["#tlTc:corte","#tlSrc:bruto"].forEach(x=>{ const [id,c]=x.split(":"); const el=$(id);
+  el.addEventListener("keydown", e=>{ if(e.key==="Enter"){ e.preventDefault(); tlIr(c); } if(e.key==="Escape"){ el.blur(); tlSync(); } e.stopPropagation(); });
+  el.addEventListener("focus", ()=>el.select()); el.addEventListener("blur", ()=>setTimeout(tlSync,0)); });
 /* ================================================================
    SEARCH LAB + INSIGHTS (vindos do Creator Room)
    Search Lab: palavras-chave, cauda longa, perguntas, assuntos
